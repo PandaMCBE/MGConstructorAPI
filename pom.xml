@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>fr.pandamcbe.mg-land</groupId>
+    <artifactId>pandafun-plugin</artifactId>
+    <version>dev-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>MGConstructorAPI</artifactId>
+  <version>1.0</version>
+  <packaging>jar</packaging>
+
+  <name>MGConstructorApi</name>
+
+
+  <dependencies>
+    <dependency>
+      <groupId>fr.pandamcbe.mg-land</groupId>
+      <artifactId>MGCosmetiques</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.spigotmc</groupId>
+      <artifactId>spigot-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.sk89q.worldedit</groupId>
+      <artifactId>worldedit-bukkit</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>fr.pandamcbe.mg-land</groupId>
+      <artifactId>MGApi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>me.clip</groupId>
+      <artifactId>placeholderapi</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>net.luckperms</groupId>
+      <artifactId>api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.github.decentsoftware-eu</groupId>
+      <artifactId>decentholograms</artifactId>
+    </dependency>
+  </dependencies>
+</project>
