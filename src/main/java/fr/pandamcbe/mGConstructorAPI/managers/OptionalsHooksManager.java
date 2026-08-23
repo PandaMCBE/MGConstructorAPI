@@ -10,9 +10,9 @@ public abstract class OptionalsHooksManager {
 
     public void breakOrPlace(Arena arena){}
 
-    public void playerQuits(Player leaver) {}
+    public void playerQuits(Arena arena, Player leaver) {}
 
-    public void respawning(Player player) {}
+    public void respawning(Arena arena, Player player) {}
 
     public String getPrefix() {return null;}
 

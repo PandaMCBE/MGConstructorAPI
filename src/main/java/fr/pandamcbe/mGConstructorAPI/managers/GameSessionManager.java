@@ -1,13 +1,16 @@
 package fr.pandamcbe.mGConstructorAPI.managers;
 
+import fr.pandamcbe.commons.ProfilAccount;
 import fr.pandamcbe.commons.StatsAccount;
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
+import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.MGArena;
-import fr.pandamcbe.mGConstructorAPI.arenas.Team;
+import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
 import fr.pandamcbe.mgapi.Main;
+import fr.pandamcbe.mgapi.core.localmemory.DirtyManager;
 import fr.pandamcbe.mgapi.core.localmemory.MemAccountsManipulation;
-import fr.pandamcbe.mgapi.serverutilapi.enums_strings.AllNames;
+import fr.pandamcbe.mgapi.serverutilapi.enums_strings.AccountType;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -25,6 +28,7 @@ public class GameSessionManager extends OptionalsHooksManager {
     private final WaitingRoom waitingRoom = MGConstructorAPI.getInstance().getWaitingRoomManager();
     private final MemAccountsManipulation memoryProvider = Main.getInstance().manipulation;
     private final String serverName = Main.getInstance().serverName;
+    private final DirtyManager dirtyManager = new DirtyManager();
 
     public void onPlayersJoin(Player p) {
         p.setHealthScale(20);
@@ -33,17 +37,18 @@ public class GameSessionManager extends OptionalsHooksManager {
             waitingRoom.getWaitingRoom().add(p.getUniqueId());
     }
 
-    public void teleport(Arena arena) {
-        MGArena nextArena = (MGArena) arena;
+    public void teleport(Arena nextArena) {
         if (nextArena != null) { //Si l'arène n'est pas null
-            if(nextArena.totalTeams == 0) {
-                for (int i = 0; i < nextArena.getAlluuids().size(); i++) { //Pour chaque élément contenu dans liste d'ensemble de joueur de l'arène en fonction de sa taille
-                    UUID uuid = nextArena.getAlluuids().get(i); //Initialisation d'un objet Joueur à un élément de la liste
-                    Location spawn = nextArena.getSpawns().get(i); //Initialisation d'un objet Location à spawn parmi ceux qui sont présents dans la liste getSpawns, associé à l'élément de la boucle
+            if(nextArena instanceof MGArena) {
+                MGArena mgArena = (MGArena) nextArena;
+                for (int i = 0; i < mgArena.getAlluuids().size(); i++) { //Pour chaque élément contenu dans liste d'ensemble de joueur de l'arène en fonction de sa taille
+                    UUID uuid = mgArena.getAlluuids().get(i); //Initialisation d'un objet Joueur à un élément de la liste
+                    Location spawn = mgArena.getSpawns().get(i); //Initialisation d'un objet Location à spawn parmi ceux qui sont présents dans la liste getSpawns, associé à l'élément de la boucle
                     Bukkit.getPlayer(uuid).teleport(spawn); //Téléporter le joueur à son spawn affilié
                 }
             } else {
-                arena.getTeams().forEach(team-> team.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(arena.getLocByTeam().get(team.getColor()))));
+                TeamArena teamArena = (TeamArena) nextArena;
+                teamArena.getTeams().forEach(team-> team.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(teamArena.getSpawnByTeam().get(team.getColor()))));
             }
         }
     }
@@ -51,9 +56,12 @@ public class GameSessionManager extends OptionalsHooksManager {
     public void nextRound(List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
         Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(winner.getUniqueId(), arenaList);
         if (arena.getAlluuids().size() > 1) {
-            StatsAccount statsAccount = (StatsAccount) memoryProvider.getAccount(mainMap, winner.getUniqueId(), AllNames.statsPojo(serverName));
-            statsAccount.setCoins(statsAccount.getCoins() + Coins);
+            StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winner.getUniqueId(), AccountType.statsKey(serverName));
+            ProfilAccount profilAccount = (ProfilAccount) memoryProvider.getProfilAccount(mainMap, winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix());
+            profilAccount.setCoins(profilAccount.getCoins() + Coins);
             statsAccount.setElos(statsAccount.getElos()+ Elos);
+            dirtyManager.markDirty(winner.getUniqueId(), AccountType.statsKey(serverName), statsAccount);
+            dirtyManager.markDirty(winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix(), profilAccount);
             ifLessThanFiveRoundsCore(arena, winner);
         }
     }
@@ -78,7 +86,6 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-
     public void ifLessThanFiveRoundsCore(Arena arena, Player winner) {
         if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.maxRounds -1 )) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
             arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
@@ -102,7 +109,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 winnerArena.restart(); //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
                 for (UUID uuids : winnerArena.getAlluuids()) {
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
-                    waitingRoom.joinAgain(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
+                    waitingRoom.addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
                 }
             }, 10 * 20);
         }
@@ -112,16 +119,19 @@ public class GameSessionManager extends OptionalsHooksManager {
         Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(team.getUuidList().getFirst(), arenaList);
         if (arena.getAlluuids().size() > 1) {
             for(UUID winnerUuid : team.getUuidList()) {
-                StatsAccount statsAccount = (StatsAccount) memoryProvider.getAccount(mainMap, winnerUuid, AllNames.statsPojo(serverName));
-                statsAccount.setCoins(statsAccount.getCoins() + Coins);
-                statsAccount.setElos(statsAccount.getElos() + Elos);
+                StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winnerUuid, AccountType.statsKey(serverName));
+                ProfilAccount profilAccount = (ProfilAccount) memoryProvider.getProfilAccount(mainMap, winnerUuid, AccountType.PROFIL.getKeyPrefix());
+                profilAccount.setCoins(profilAccount.getCoins() + Coins);
+                statsAccount.setElos(statsAccount.getElos()+ Elos);
+                dirtyManager.markDirty(winnerUuid, AccountType.statsKey(serverName), statsAccount);
+                dirtyManager.markDirty(winnerUuid, AccountType.PROFIL.getKeyPrefix(), profilAccount);
             }
             ifLessThanFiveRoundsCoreTeam(arena, team);
 
         }
     }
 
-    public void ifLastRoundCoreTeam(Arena arena) {
+    public void ifLastRoundCoreTeam(TeamArena arena) {
         List<Team> nearFivePoints = arena.getTeams().stream().filter(team -> team.getPoints() == (arena.maxRounds - 1)).collect(Collectors.toList());
         nearFivePoints.forEach(team -> team.setPoints(team.getPoints() + 1));
         if(arena.getTeams().stream().anyMatch(team -> team.getPoints() == (arena.maxRounds - 1))) {
@@ -149,7 +159,7 @@ public class GameSessionManager extends OptionalsHooksManager {
 
     public void eliminateCoreTeam(Team victimTeam, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victimTeam.getUuidList().get(0), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
-        MGArena victimArena = (MGArena) arena;
+        TeamArena victimArena = (TeamArena) arena;
         for(UUID uuid : victimTeam.getUuidList()) {
             Player victim = Bukkit.getPlayer(uuid);
             victim.teleport(victimArena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
@@ -160,7 +170,7 @@ public class GameSessionManager extends OptionalsHooksManager {
 
     public void checkWinCoreTeam(Team winnerTeam, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(winnerTeam.getUuidList().get(0), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
-        MGArena winnerArena = (MGArena) arena;
+        TeamArena winnerArena = (TeamArena) arena;
         if (winnerArena.getTeams().size() >= 2) { //Si la liste des teams de l'arène a une taille supérieure ou égale à deux (parce qu'il ne faudrait pas qu'elle soit seule dans la partie, sinon ça ne compte pas)
             winnerTeam.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).sendMessage(getPrefix() + " > §l§3Une nouvelle partie va débuter dans 10s !"));
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
@@ -168,7 +178,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 for (UUID uuids : winnerTeam.getUuidList()) {
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
                     //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
-                    waitingRoom.joinAgain(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
+                    waitingRoom.addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
                 }
             }, 10 * 20);
         }
@@ -196,7 +206,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 public void run() {
                     if (!player.isOnline()) { //Si le joueur mort n'est pas en ligne sur le serveur
                         cancel(); //Annuler le runnable
-                        playerQuits(player);
+                        playerQuits(arena, player);
                         return; //Arrêter l'exécution du reste du code
                     }
 
@@ -204,7 +214,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                         player.sendMessage("§cRespawn dans :" + timer); //Envoyer au joueur l'avancée du timer avec son respawn
                     } else {
                         player.setGameMode(mode); //Mettre le joueur en mode aventure
-                        respawning(player); //Appliquer le constructeur de la classe GiveKitsUtils donnant son kit au joueur
+                        respawning(arena, player); //Appliquer le constructeur de la classe GiveKitsUtils donnant son kit au joueur
 
                         cancel(); //Arrêter le runnable
                     }
@@ -226,7 +236,7 @@ public class GameSessionManager extends OptionalsHooksManager {
         return Bukkit.getPlayer(uuid); //retourner le joueur en paramètre par défaut
     }
 
-    public Team getOpponentTeam(Team team, Arena arena){
+    public Team getOpponentTeam(Team team, TeamArena arena){
         for(Team otherteam : arena.getTeams()) {
             if(team != otherteam){
                 return otherteam;
@@ -239,7 +249,7 @@ public class GameSessionManager extends OptionalsHooksManager {
         return arena.getWonRounds().keySet().stream().filter(p5 -> arena.getWonRounds().get(p5) == 5).count() > 1;
     }
 
-    public boolean tieOpponentTeamExists(Arena arena){
+    public boolean tieOpponentTeamExists(TeamArena arena){
         return arena.getTeams().stream().filter(team5 -> team5.getPoints() == 5).count() > 1;
     }
 

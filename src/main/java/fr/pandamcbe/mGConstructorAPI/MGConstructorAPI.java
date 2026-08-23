@@ -1,6 +1,5 @@
 package fr.pandamcbe.mGConstructorAPI;
 
-import fr.pandamcbe.mGConstructorAPI.arenas.Team;
 import fr.pandamcbe.mGConstructorAPI.listeners.ParameterListeners;
 import fr.pandamcbe.mGConstructorAPI.managers.ArenaManager;
 import fr.pandamcbe.mGConstructorAPI.managers.GameSessionManager;

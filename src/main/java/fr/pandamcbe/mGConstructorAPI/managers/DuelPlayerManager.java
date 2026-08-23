@@ -3,9 +3,10 @@ package fr.pandamcbe.mGConstructorAPI.managers;
 import fr.pandamcbe.commons.DuelAccount;
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
-import fr.pandamcbe.mGConstructorAPI.arenas.DuelArena;
-import fr.pandamcbe.mGConstructorAPI.arenas.Team;
+import fr.pandamcbe.mGConstructorAPI.Team;
+import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
 import fr.pandamcbe.mgapi.serverutilapi.enums_strings.AllNames;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.io.ByteArrayOutputStream;
@@ -37,6 +38,30 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
         }
     }
 
+    public void joinArena(List<Arena> arenaList, List<UUID> waitingRoom, Arena nextArena, Player p) {
+        UUID uuid = p.getUniqueId();
+
+        if(nextArena == null || nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()){
+            waitingRoom.waiting(arenaList, nextArena, p);
+        }
+
+        if (nextArena != null) {
+            waitingRoom.addWaitingPlayerToArena(nextArena, arenaList);
+            if (!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() != nextArena.getMaxPlayersAllowed()) {
+                nextArena.getAlluuids().add(uuid);
+            } else waitingRoom.waiting(arenaList, nextArena, p);
+            if(nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
+                p.teleport(Bukkit.getPlayer(waitingRoom.getWaitingRoom().getFirst()).getLocation());
+            }
+            //Comment être sûr que les joueurs d'un duel soient toujours mis en relation même après avoir été placé en attente ?
+            //Envisager le retrait de joinArena de ArenaManager pour le placer dans MGPlayerManager et MGDuelManager qui devraient
+            //d'ailleurs trouver un meilleur nom.
+            team.addPlayer((TeamArena) nextArena, p);
+
+            arenaManager.startArena(nextArena, p);
+        }
+    }
+
     private UUID findOpponent(DuelAccount duelAccount, Player p){
         if(!p.getUniqueId().equals(duelAccount.getPlayer1UUID())){
             return duelAccount.getPlayer1UUID();
@@ -46,22 +71,22 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
     }
 
     public void whenPlayerDisconnects(Player leaver, Arena arena, List<Arena> arenaList) {
-        DuelArena duelArena = (DuelArena) arena;
+        TeamArena teamArena = (TeamArena) arena;
         MGConstructorAPI.getInstance().getScoreboardManager().onLogout(leaver);
         UUID leaverUUID = leaver.getUniqueId();
         waitingRoomManager.getWaitingRoom().remove(leaverUUID);
 
-        if (duelArena != null) {
-            duelArena.getAlluuids().remove(leaverUUID);
-            team.getTeamByPlayer(leaver, duelArena).getUuidList().remove(leaverUUID);
+        if (teamArena != null) {
+            teamArena.getAlluuids().remove(leaverUUID);
+            team.getTeamByPlayer(leaver, teamArena).getUuidList().remove(leaverUUID);
 
-            if (duelArena.getAlluuids().size() == 1) {
-                Player winner = gameManager.getOpponent(leaverUUID, duelArena);
+            if (teamArena.getAlluuids().size() == 1) {
+                Player winner = gameManager.getOpponent(leaverUUID, teamArena);
                 if (winner.isOnline()) {
-                    if (!waitingRoomManager.getWaitingRoom().contains(winner.getUniqueId()) && duelArena.isStarted) {
-                        breakOrPlace(duelArena);
-                        duelArena.restart();
-                        Team pTeam = team.getTeamByPlayer(winner, duelArena);
+                    if (!waitingRoomManager.getWaitingRoom().contains(winner.getUniqueId()) && teamArena.isStarted) {
+                        breakOrPlace(teamArena);
+                        teamArena.restart();
+                        Team pTeam = team.getTeamByPlayer(winner, teamArena);
                         pTeam.getUuidList().remove(winner.getUniqueId());
                         ByteArrayOutputStream a = new ByteArrayOutputStream();
                         DataOutputStream out3 = new DataOutputStream(a);
@@ -75,10 +100,10 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
                     }
                 }
             }
-            if (duelArena.getAlluuids().isEmpty()) {
-                breakOrPlace(duelArena);
-                duelArena.restart();
-                waitingRoomManager.joinAgain(duelArena, arenaList);
+            if (teamArena.getAlluuids().isEmpty()) {
+                breakOrPlace(teamArena);
+                teamArena.restart();
+                waitingRoomManager.addWaitingPlayerToArena(teamArena, arenaList);
             }
         }
     }

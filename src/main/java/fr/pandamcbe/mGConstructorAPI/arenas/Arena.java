@@ -1,7 +1,7 @@
 package fr.pandamcbe.mGConstructorAPI.arenas;
 
+import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.managers.OptionalsHooksManager;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -17,9 +17,6 @@ public abstract class Arena extends OptionalsHooksManager {
     public State state;
     public Location middlespawn;
     public Map<UUID, Integer> wonRounds;
-    public List<Team> teams;
-    public Map<ChatColor, Location> locByTeam;
-    public int totalTeams;
     public int rounds;
     public int maxRounds;
     public int timerCycle;
@@ -51,14 +48,6 @@ public abstract class Arena extends OptionalsHooksManager {
     public void setBlocks(Map<Location, Material> blocks) {
         this.blocks = blocks;
     }
-
-//    public boolean isStarted() {
-//        return isStarted;
-//    }
-//
-//    public void setStarted(boolean started) {
-//        isStarted = started;
-//    }
 
     public String getName() {
         return name;
@@ -138,30 +127,6 @@ public abstract class Arena extends OptionalsHooksManager {
 
     public void setStartingTimer(int startingTimer) {
         this.startingTimer = startingTimer;
-    }
-
-    public List<Team> getTeams() {
-        return teams;
-    }
-
-    public void setTeams(List<Team> teams) {
-        this.teams = teams;
-    }
-
-    public Map<ChatColor, Location> getLocByTeam() {
-        return locByTeam;
-    }
-
-    public void setLocByTeam(Map<ChatColor, Location> locByTeam) {
-        this.locByTeam = locByTeam;
-    }
-
-    public int getTotalTeams() {
-        return totalTeams;
-    }
-
-    public void setTotalTeams(int totalTeams) {
-        this.totalTeams = totalTeams;
     }
 
     public int getMaxPlayersAllowed() {

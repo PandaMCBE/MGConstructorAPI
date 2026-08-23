@@ -1,5 +1,6 @@
-package fr.pandamcbe.mGConstructorAPI.arenas;
+package fr.pandamcbe.mGConstructorAPI;
 
+import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -59,15 +60,15 @@ import java.util.UUID;
             Team.points = points;
         }
 
-        public Team getNextTeam(Arena mgArena, Integer totalTeams){
-            for(Team team : mgArena.getTeams()) {
-                if(team.getUuidList().size() < getMaximum(mgArena.getAlluuids().size(), totalTeams)) {
+        public Team getNextTeam(TeamArena arena, Integer totalTeams){
+            for(Team team : arena.getTeams()) {
+                if(team.getUuidList().size() < getMaximum(arena.getAlluuids().size(), totalTeams)) {
                     return team;
                 }
             }
             return null;
         }
-        public void addPlayer(Arena nextArena, Player p) {
+        public void addPlayer(TeamArena nextArena, Player p) {
             if (getNextTeam(nextArena, nextArena.getTotalTeams()) != null) {
                 Team nextTeam = getNextTeam(nextArena, nextArena.getTotalTeams());
                 if (!nextTeam.getUuidList().contains(p.getUniqueId()))
@@ -75,9 +76,9 @@ import java.util.UUID;
             }
         }
 
-        public void TeleportTeams(Arena nextArena) {
+        public void TeleportTeams(TeamArena nextArena) {
             if (nextArena != null) {
-                nextArena.getTeams().forEach(team -> team.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(nextArena.getLocByTeam().get(team.getColor()))));
+                nextArena.getTeams().forEach(team -> team.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(nextArena.getSpawnByTeam().get(team.getColor()))));
             }
         }
 
@@ -89,7 +90,7 @@ import java.util.UUID;
 
         }
 
-        public Team getSpecificTeam(Arena arena, ChatColor color){
+        public Team getSpecificTeam(TeamArena arena, ChatColor color){
             for(Team team : arena.getTeams()){
                 if(team.getColor().equals(color)){
                     return team;
@@ -98,7 +99,7 @@ import java.util.UUID;
             return null;
         }
 
-        public Team getTeamByPlayer(Player player, Arena arena){
+        public Team getTeamByPlayer(Player player, TeamArena arena){
             for(Team team : arena.getTeams()) {
                 if(team.getUuidList().contains(player.getUniqueId())) {
                     return team;

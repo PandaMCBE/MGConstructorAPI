@@ -1,7 +1,7 @@
 package fr.pandamcbe.mGConstructorAPI.managers;
 
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
-import fr.pandamcbe.mGConstructorAPI.arenas.MGArena;
+import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
@@ -13,9 +13,9 @@ import java.util.UUID;
 
 public class CountDownsManager {
 
-    private final MGArena arena; //Instanciation de la classe Arena avec une variable de type privée et constante
+    private final Arena arena; //Instanciation de la classe Arena avec une variable de type privée et constante
     private final ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
-    public CountDownsManager(MGArena arena) {
+    public CountDownsManager(Arena arena) {
         this.arena = arena; //Initialisation de la variable arena avec celle qui est donnée par le constructeur
     }
 
@@ -26,7 +26,7 @@ public class CountDownsManager {
         }
 
         if (!pls.isOnline()) { //Si un joueur n'est pas en ligne
-            arenaManager.playerQuits(pls); //Appliquer cette méthode pour cet objet Joueur de la liste
+            arenaManager.playerQuits(arena, pls); //Appliquer cette méthode pour cet objet Joueur de la liste
         }
         switch (arena.getStartingTimer()){
             case 10:
@@ -57,7 +57,7 @@ public class CountDownsManager {
         for (UUID uuid : arena.getAlluuids()) { //Pour chaque joueur dans la liste d'ensemble de l'arène
             Player p = Bukkit.getPlayer(uuid);
             if (!p.isOnline()) { //Si un joueur n'est pas en ligne
-                arenaManager.playerQuits(p); //Appliquer cette méthode pour cet objet Joueur de la liste
+                arenaManager.playerQuits(arena, p); //Appliquer cette méthode pour cet objet Joueur de la liste
             }
 
             if (timer > 0) {
