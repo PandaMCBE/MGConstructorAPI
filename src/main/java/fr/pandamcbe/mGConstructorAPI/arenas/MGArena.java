@@ -16,6 +16,6 @@ public abstract class MGArena extends Arena {
         spawns = Spawns;
     }
 
-    public abstract void nextMGRound(Arena arena, Object o);
+    public abstract void nextRound(MGArena arena, Object o);
 
 }

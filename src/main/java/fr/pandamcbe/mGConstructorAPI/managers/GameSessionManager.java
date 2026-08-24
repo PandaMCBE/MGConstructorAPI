@@ -63,37 +63,39 @@ public class GameSessionManager extends OptionalsHooksManager {
             statsAccount.setElos(statsAccount.getElos()+ Elos);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.statsKey(serverName), statsAccount);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix(), profilAccount);
-            ifLessThanFiveRoundsCore(arena, winner);
+            ifLessThanMaxRounds(arena, winner);
+            ifLastRound(arena);
         }
     }
 
-    public void ifLastRoundCore(Arena arena) {
-        List<UUID> nearFivePoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == (arena.maxRounds - 1)).collect(Collectors.toList());
-        nearFivePoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) + 1));
-
-        if(arena.getWonRounds().keySet().stream().anyMatch(uuid -> arena.getWonRounds().get(uuid) == (arena.maxRounds - 1))) {
-            if (tieOpponentExists(arena)) {
-                nearFivePoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) - 1));
-                for (UUID uuid : arena.getInGamePlayers()) {
-                    Player pls = Bukkit.getPlayer(uuid);
-                    pls.sendTitle("§eEgalité !", "§6Recommencez");
-                    pls.sendMessage(getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la partie et que le meilleur gagne !");
+    public void ifLastRound(Arena arena) {
+        List<UUID> nearMaxPoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == (arena.maxRounds - 1)).collect(Collectors.toList());
+        nearMaxPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) + 1));
+        if(!nearMaxPoints.isEmpty()) {
+            if (arena.getWonRounds().keySet().stream().anyMatch(uuid -> arena.getWonRounds().get(uuid) == arena.maxRounds)) {
+                if (tieOpponentExists(arena)) {
+                    nearMaxPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) - 1));
+                    for (UUID uuid : arena.getInGamePlayers()) {
+                        Player pls = Bukkit.getPlayer(uuid);
+                        pls.sendTitle("§eEgalité !", "§6Recommencez");
+                        pls.sendMessage(getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la partie et que le meilleur gagne !");
+                    }
+                    startCountDown(arena);
+                } else {
+                    Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.maxRounds).findAny();
+                    winner.ifPresent(uuid -> customWinEvent(Bukkit.getPlayer(uuid)));
                 }
-                startCountDown(arena);
-            } else {
-                Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.maxRounds).findAny();
-                winner.ifPresent(uuid -> customWinEvent(Bukkit.getPlayer(uuid)));
             }
         }
     }
 
-    public void ifLessThanFiveRoundsCore(Arena arena, Player winner) {
+    public void ifLessThanMaxRounds(Arena arena, Player winner) {
         if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.maxRounds -1 )) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
             arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
         }
     }
 
-    public void eliminateCore(Player victim, List<Arena> arenaList) {
+    public void eliminate(Player victim, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victim.getUniqueId(), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
         MGArena victimArena = (MGArena) arena;
         victim.teleport(victimArena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
@@ -117,7 +119,7 @@ public class GameSessionManager extends OptionalsHooksManager {
     }
 
     public void nextRoundTeam(List<Arena> arenaList, Team team, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
-        Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(team.getUuidList().getFirst(), arenaList);
+        TeamArena arena = (TeamArena) MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(team.getUuidList().getFirst(), arenaList);
         if (arena.getAlluuids().size() > 1) {
             for(UUID winnerUuid : team.getUuidList()) {
                 StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winnerUuid, AccountType.statsKey(serverName));
@@ -127,44 +129,49 @@ public class GameSessionManager extends OptionalsHooksManager {
                 dirtyManager.markDirty(winnerUuid, AccountType.statsKey(serverName), statsAccount);
                 dirtyManager.markDirty(winnerUuid, AccountType.PROFIL.getKeyPrefix(), profilAccount);
             }
-            ifLessThanFiveRoundsCoreTeam(arena, team);
-
+            ifLessThanMaxRoundsTeam(arena, team);
+            ifLastRoundTeam(arena);
         }
     }
 
-    public void ifLastRoundCoreTeam(TeamArena arena) {
-        List<Team> nearFivePoints = arena.getTeams().stream().filter(team -> team.getPoints() == (arena.maxRounds - 1)).collect(Collectors.toList());
-        nearFivePoints.forEach(team -> team.setPoints(team.getPoints() + 1));
-        if(arena.getTeams().stream().anyMatch(team -> team.getPoints() == (arena.maxRounds - 1))) {
-            if (tieOpponentTeamExists(arena)) {
-                nearFivePoints.forEach(team -> team.setPoints(team.getPoints() - 1));
-                for (UUID uuid : arena.getAlluuids()) {
-                    Player pls = Bukkit.getPlayer(uuid);
-                    pls.sendTitle("§eEgalité !", "§6Recommencez");
-                    pls.sendMessage(getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la partie et que le meilleur gagne !");
-                }
-                startCountDown(arena);
-
-            } else {
-                Optional<Team> winner = arena.getTeams().stream().filter(team -> team.getPoints() == arena.maxRounds).findAny();
-                winner.ifPresent(team -> customWinEvent(winner.get()));
-            }
-        }
-    }
-
-    public void ifLessThanFiveRoundsCoreTeam(Arena arena, Team winnerTeam) {
+    public void ifLessThanMaxRoundsTeam(TeamArena arena, Team winnerTeam) {
         if (winnerTeam.getPoints() < (arena.maxRounds - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
             winnerTeam.setPoints(winnerTeam.getPoints() + 1); //Ajouter 1 à la valeur de la clé du joueur
         }
     }
 
-    public void eliminateCoreTeam(UUID victimUUID, List<Arena> arenaList) {
+    public void ifLastRoundTeam(TeamArena arena) {
+        List<Team> nearMaxPoints = arena.getTeams().stream().filter(team -> team.getPoints() == (arena.maxRounds - 1)).collect(Collectors.toList());
+        if (!nearMaxPoints.isEmpty()) {
+            nearMaxPoints.forEach(team -> team.setPoints(team.getPoints() + 1));
+            if (arena.getTeams().stream().anyMatch(team -> team.getPoints() == arena.maxRounds)) {
+                if (tieOpponentTeamExists(arena)) {
+                    nearMaxPoints.forEach(team -> team.setPoints(team.getPoints() - 1));
+                    for (UUID uuid : arena.getAlluuids()) {
+                        Player pls = Bukkit.getPlayer(uuid);
+                        pls.sendTitle("§eEgalité !", "§6Recommencez");
+                        pls.sendMessage(getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la manche et que le meilleur gagne !");
+                    }
+                    startCountDown(arena);
+
+                } else {
+                    Optional<Team> winner = arena.getTeams().stream().filter(team -> team.getPoints() == arena.maxRounds).findAny();
+                    winner.ifPresent(team -> customWinEvent(winner.get()));
+                }
+            }
+        }
+    }
+
+    public void eliminateTeam(UUID victimUUID, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victimUUID, arenaList);
         Team victimTeam = team.getTeamByPlayer(Bukkit.getPlayer(victimUUID), (TeamArena) arena);
         TeamArena victimArena = (TeamArena) arena;
-            if(victimTeam.getUuidList().stream().filter(uuid1 -> !victimArena.inGamePlayers.contains(uuid1)).count() == (victimTeam.getMaximum(victimArena.maxPlayersAllowed, victimArena.totalTeams) -1)) {
-                eliminateCore(Bukkit.getPlayer(victimUUID), arenaList);
-            } else {
+        long eliminatedTeammates = victimTeam.getUuidList().stream().filter(uuid1 -> !victimArena.inGamePlayers.contains(uuid1)).count();
+        int maxPlayersByTeam = victimTeam.getMaximum(victimArena.maxPlayersAllowed, victimArena.totalTeams);
+            if(eliminatedTeammates < maxPlayersByTeam) {
+                eliminate(Bukkit.getPlayer(victimUUID), arenaList);
+            }
+            if(eliminatedTeammates == maxPlayersByTeam) {
                 victimArena.getAlluuids().forEach(uuid1 -> Bukkit.getPlayer(uuid1).sendMessage(getPrefix() + " > §l§3La team §r" + victimTeam.getColor()+victimTeam.getString()+ " §l§3a perdue ! §c§l-1000 aura."));
             }
     }

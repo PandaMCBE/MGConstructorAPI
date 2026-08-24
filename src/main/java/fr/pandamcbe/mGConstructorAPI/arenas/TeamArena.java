@@ -46,6 +46,6 @@ public abstract class TeamArena extends Arena{
         this.goalByTeam = goalByTeam;
     }
 
-    public abstract void nextTeamRound(Arena arena, Team team);
+    public abstract void nextRound(TeamArena arena, Team team);
 
 }
