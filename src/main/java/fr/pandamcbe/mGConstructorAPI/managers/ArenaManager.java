@@ -5,6 +5,8 @@ import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.MGArena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
+import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -46,6 +48,30 @@ public class ArenaManager extends OptionalsHooksManager {
             return "§cIndisponible"; //Retourner un message indiquant l'indisponibilité
         }else {
             return arena.getName(); //Sinon, afficher le nom de l'arène sélectionnée
+        }
+    }
+
+    public void joinArena(List<Arena> arenaList, Arena nextArena, Player p) {
+        UUID uuid = p.getUniqueId();
+
+        if(nextArena == null || nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()){
+            waitingRoomManager.waiting(arenaList, nextArena, p);
+        }
+
+        if (nextArena != null) {
+            waitingRoomManager.addWaitingPlayerToArena(nextArena, arenaList);
+            if (!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() != nextArena.getMaxPlayersAllowed()) {
+                nextArena.getAlluuids().add(uuid);
+            } else waitingRoomManager.waiting(arenaList, nextArena, p);
+            if(nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
+                p.teleport(Bukkit.getPlayer(waitingRoomManager.getWaitingRoom().getFirst()).getLocation());
+            }
+            //Comment être sûr que les joueurs d'un duel soient toujours mis en relation même après avoir été placé en attente ?
+            //Envisager le retrait de joinArena de ArenaManager pour le placer dans MGPlayerManager et MGDuelManager qui devraient
+            //d'ailleurs trouver un meilleur nom.
+            team.addPlayer((TeamArena) nextArena, p);
+
+            startArena(nextArena, p);
         }
     }
 

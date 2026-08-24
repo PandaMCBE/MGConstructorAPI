@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 
 public abstract class OptionalsHooksManager {
 
-    public void startCountDown(Arena mgArena){}
+    public void startCountDown(Arena arena){}
 
     public void breakOrPlace(Arena arena){}
 

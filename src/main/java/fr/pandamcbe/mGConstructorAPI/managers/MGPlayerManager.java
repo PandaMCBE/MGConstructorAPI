@@ -6,7 +6,6 @@ import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.MGArena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -21,32 +20,9 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
 
     public void lookForArena(List<Arena> arenaList, String mgmode, Player p){
         MGArena nextArena = (MGArena) arenaManager.getNextArena(arenaList, mgmode);
-        joinArena(arenaList, nextArena, p);
+        arenaManager.joinArena(arenaList, nextArena, p);
     }
 
-    public void joinArena(List<Arena> arenaList, Arena nextArena, Player p) {
-        UUID uuid = p.getUniqueId();
-
-        if(nextArena == null || nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()){
-            waitingRoom.waiting(arenaList, nextArena, p);
-        }
-
-        if (nextArena != null) {
-            waitingRoom.addWaitingPlayerToArena(nextArena, arenaList);
-            if (!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() != nextArena.getMaxPlayersAllowed()) {
-                nextArena.getAlluuids().add(uuid);
-            } else waitingRoom.waiting(arenaList, nextArena, p);
-            if(nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
-                p.teleport(Bukkit.getPlayer(waitingRoom.getWaitingRoom().getFirst()).getLocation());
-            }
-            //Comment être sûr que les joueurs d'un duel soient toujours mis en relation même après avoir été placé en attente ?
-            //Envisager le retrait de joinArena de ArenaManager pour le placer dans MGPlayerManager et MGDuelManager qui devraient
-            //d'ailleurs trouver un meilleur nom.
-            team.addPlayer((TeamArena) nextArena, p);
-
-            arenaManager.startArena(nextArena, p);
-        }
-    }
 
     public void whenPlayerDisconnects(Player leaver, Arena arena, List<Arena> arenaList) {
         TeamArena teamArena = (TeamArena) arena;

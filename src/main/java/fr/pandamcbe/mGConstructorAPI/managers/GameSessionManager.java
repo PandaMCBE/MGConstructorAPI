@@ -29,6 +29,7 @@ public class GameSessionManager extends OptionalsHooksManager {
     private final MemAccountsManipulation memoryProvider = Main.getInstance().manipulation;
     private final String serverName = Main.getInstance().serverName;
     private final DirtyManager dirtyManager = new DirtyManager();
+    private final Team team = MGConstructorAPI.getInstance().getTeam();
 
     public void onPlayersJoin(Player p) {
         p.setHealthScale(20);
@@ -157,15 +158,15 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-    public void eliminateCoreTeam(Team victimTeam, List<Arena> arenaList) {
-        Arena arena = arenaManager.getArenaByPlayer(victimTeam.getUuidList().get(0), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
+    public void eliminateCoreTeam(UUID victimUUID, List<Arena> arenaList) {
+        Arena arena = arenaManager.getArenaByPlayer(victimUUID, arenaList);
+        Team victimTeam = team.getTeamByPlayer(Bukkit.getPlayer(victimUUID), (TeamArena) arena);
         TeamArena victimArena = (TeamArena) arena;
-        for(UUID uuid : victimTeam.getUuidList()) {
-            Player victim = Bukkit.getPlayer(uuid);
-            victim.teleport(victimArena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
-            victim.setGameMode(GameMode.SPECTATOR); //Mode du joueur en spectateur
-            victimArena.getInGamePlayers().remove(victim.getUniqueId()); //Retirement du joueur de la liste des non éliminés
-        }
+            if(victimTeam.getUuidList().stream().filter(uuid1 -> !victimArena.inGamePlayers.contains(uuid1)).count() == (victimTeam.getMaximum(victimArena.maxPlayersAllowed, victimArena.totalTeams) -1)) {
+                eliminateCore(Bukkit.getPlayer(victimUUID), arenaList);
+            } else {
+                victimArena.getAlluuids().forEach(uuid1 -> Bukkit.getPlayer(uuid1).sendMessage(getPrefix() + " > §l§3La team §r" + victimTeam.getColor()+victimTeam.getString()+ " §l§3a perdue ! §c§l-1000 aura."));
+            }
     }
 
     public void checkWinCoreTeam(Team winnerTeam, List<Arena> arenaList) {

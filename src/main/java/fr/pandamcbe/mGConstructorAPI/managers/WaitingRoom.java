@@ -65,15 +65,6 @@ public class WaitingRoom extends OptionalsHooksManager{
         }
     }
 
-//    public void joinAgain(Arena arena, List<Arena> arenaList) {
-//        if (waitingRoom.size() > 1) //Si la liste de file d'attente a une taille supérieure à 1
-//            for (UUID waiting : waitingRoom) { //Pour chaque joueur contenu dans la liste de file d'attente
-//                if (arenaManager.getArenaByPlayer(waiting, arenaList) == null) { //Si l'arène où se trouve un élément retourné de la boucle est null donc si les joueurs en attente n'ont pas d'arène
-//                    arenaManager.joinArena(arenaList, arena, Bukkit.getPlayer(waiting)); //Appliquer la méthode joinArena sur ces joueurs
-//                }
-//            }
-//    }
-
     public WaitingRoom clone() {
         try {
             return (WaitingRoom) super.clone();
