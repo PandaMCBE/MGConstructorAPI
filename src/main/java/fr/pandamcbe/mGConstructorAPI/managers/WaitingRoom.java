@@ -8,15 +8,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 public class WaitingRoom extends OptionalsHooksManager{
 
-    public Queue<List<UUID>> queue;
+    public Queue<Map<String, List<UUID>>> queue;
     public Location location;
 
     public WaitingRoom(){
@@ -32,48 +30,62 @@ public class WaitingRoom extends OptionalsHooksManager{
         this.location = location;
     }
 
-    public Queue<List<UUID>> getQueue() {
+    public Queue<Map<String, List<UUID>>> getQueue() {
         return queue;
     }
 
-    public void setQueue(Queue<List<UUID>> queue) {
+    public void setQueue(Queue<Map<String, List<UUID>>> queue) {
         this.queue = queue;
     }
 
     final private ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
 
-    public List<UUID> getWaitingListByPlayer(UUID uuid){
-        for(List<UUID> list : queue){
-            if(list.contains(uuid)){
-                return list;
+    public List<UUID> getWaitingListByPlayer(UUID uuid) {
+        for (Map<String, List<UUID>> map : queue) {
+            for (List<UUID> list : map.values()) {
+                if (list.contains(uuid)) {
+                    return list;
+                }
             }
         }
         return null;
     }
 
-    public void waiting(List<Arena> arenaList, Arena arena, Player p){
-        if(arenaManager.getArenaByPlayer(p.getUniqueId(), arenaList) == null) {
-            if (queue.isEmpty()) {
-                queue.add(new ArrayList<>());
-            }
-            for (List<UUID> list : queue) {
-                if (!list.contains(p.getUniqueId()) && list.size() < arena.getMaxPlayersAllowed()) {
-                    list.add(p.getUniqueId());
-                } else {
-                    List<UUID> newGroup = new ArrayList<>();
-                    newGroup.add(p.getUniqueId());
-                    queue.add(newGroup);
-                }
-            }
-            p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
+    public String waitingReason(List<Arena> arenaList, Player player){
+        Arena arena = arenaManager.getArenaByPlayer(player.getUniqueId(), arenaList);
+        if(arena == null) {
+            return "noArenaAvailable";
+        } else if(arena.getAlluuids().size() < arena.getMinimumPlayers()){
+            return "notEnoughPlayers";
         }
+        return null;
+    }
 
-        if (arena.getAlluuids().size() < arena.getMinimumPlayers()) {
-            if(!arena.getState().equals(State.WAITING)){
-                arena.setState(State.WAITING);
+    public void waiting(List<Arena> arenaList, Arena arena, Player p){
+        String waitingReason = waitingReason(arenaList, p);
+            List<Map<String, List<UUID>>> filtered = queue.stream().filter(stringListMap ->
+                (stringListMap.containsKey(waitingReason) && !stringListMap.get(waitingReason).contains(p.getUniqueId()) && stringListMap.get(waitingReason).size() < arena.getMaxPlayersAllowed())).collect(Collectors.toList());
+            if(!filtered.isEmpty()) {
+                for (Map<String, List<UUID>> map : filtered) {
+                    if (!map.isEmpty()) {
+                        map.get(waitingReason).add(p.getUniqueId());
+                    }
+                }
+            } else {
+                Map<String, List<UUID>> map = new HashMap<>();
+                List<UUID> list = new ArrayList<>();
+                list.add(p.getUniqueId());
+                map.put(waitingReason, list);
+                queue.add(map);
             }
-            p.sendMessage("§b§lMG-Land > §c§lNombre de joueurs minimum : §e§l" + arena.getMinimumPlayers());
-        }
+            if(waitingReason.equalsIgnoreCase("noArenaAvailable")) {
+                p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
+            } else if(waitingReason.equalsIgnoreCase("notEnoughPlayers")) {
+                if(!arena.getState().equals(State.WAITING)){
+                    arena.setState(State.WAITING);
+                }
+                p.sendMessage("§b§lMG-Land > §c§lNombre de joueurs minimum : §e§l" + arena.getMinimumPlayers());
+            }
 
         p.teleport(getLocation());
         MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, getWaitingListByPlayer(p.getUniqueId()), p, getPrefix()), p);
@@ -82,10 +94,13 @@ public class WaitingRoom extends OptionalsHooksManager{
 
     public void addWaitingPlayerToArena(Arena nextArena, List<Arena> arenaList){
         if (!queue.isEmpty()) {
-            List<UUID> waitingList = queue.poll();
-            for (UUID waiting : waitingList) {
-                if(arenaManager.getArenaByPlayer(waiting, arenaList) == null) {
-                    arenaManager.joinArena(arenaList, nextArena, Bukkit.getPlayer(waiting));
+            Map<String, List<UUID>> waitingQueue = queue.poll();
+            if (waitingQueue.keySet().stream().findAny().isPresent()) {
+                List<UUID> waitingList = waitingQueue.get(waitingQueue.keySet().stream().findAny().get());
+                for (UUID waiting : waitingList) {
+                    if (arenaManager.getArenaByPlayer(waiting, arenaList) == null) {
+                        arenaManager.joinArena(arenaList, nextArena, Bukkit.getPlayer(waiting));
+                    }
                 }
             }
         }
