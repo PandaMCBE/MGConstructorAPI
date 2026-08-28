@@ -1,7 +1,6 @@
 package fr.pandamcbe.mGConstructorAPI.scoreboards.samaboardsclasses;
 
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
-import fr.pandamcbe.mGConstructorAPI.arenas.MGArena;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mgapi.serverutilapi.scoreboards.ObjectiveSign;
@@ -33,12 +32,12 @@ public class PersonalScoreboard extends fr.pandamcbe.mgapi.serverutilapi.scorebo
     @Override
     public void setLines(String ip) {
 
-        MGArena arena = (MGArena) main.getArenaManager().getArenaByPlayer(player.getUniqueId(), arenaList);
+        Arena arena = main.getArenaManager().getArenaByPlayer(player.getUniqueId(), arenaList);
 
             if(player != null) {//Scoreboard en attente
-                    if(arena.getState() == State.WAITING || arena.getState() == State.STARTING && waitingPlayers.contains(player.getUniqueId())) {
+                    if(arena.getState() == State.WAITING) {
                         this.objectiveSign.setLine(1, "§8§m------------");
-                        this.objectiveSign.setLine(2, "§7En attente : §f" + waitingPlayers.size());
+                            this.objectiveSign.setLine(2, "§7En attente : §f" + waitingCount(arena));
                         this.objectiveSign.setLine(3, "§7Débute dans : §f" + arena.getStartingTimer() + "§fs");
                         this.objectiveSign.setLine(4, "§7Arène : §f" + main.getArenaManager().getArena(arena));
                         this.objectiveSign.setLine(5, "§8§m-----------");
@@ -46,5 +45,13 @@ public class PersonalScoreboard extends fr.pandamcbe.mgapi.serverutilapi.scorebo
                     }
                     this.objectiveSign.updateLines();
             }
+    }
+
+    public int waitingCount (Arena arena) {
+        if (arena.getWaitingRoom().getWaitingListByPlayer(uuid) != null) {
+            return arena.getWaitingRoom().getWaitingListByPlayer(uuid).size();
+        } else {
+            return arena.getAlluuids().size();
+        }
     }
 }

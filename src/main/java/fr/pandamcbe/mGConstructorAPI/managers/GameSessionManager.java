@@ -25,18 +25,10 @@ public class GameSessionManager extends OptionalsHooksManager {
 
     public List<UUID> frozens = new ArrayList<>();
     private final ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
-    private final WaitingRoom waitingRoom = MGConstructorAPI.getInstance().getWaitingRoomManager();
     private final MemAccountsManipulation memoryProvider = Main.getInstance().manipulation;
     private final String serverName = Main.getInstance().serverName;
     private final DirtyManager dirtyManager = new DirtyManager();
     private final Team team = MGConstructorAPI.getInstance().getTeam();
-
-    public void onPlayersJoin(Player p) {
-        p.setHealthScale(20);
-        clearStuffandHealth(p);
-        if(!waitingRoom.getWaitingRoom().contains(p.getUniqueId()))
-            waitingRoom.getWaitingRoom().add(p.getUniqueId());
-    }
 
     public void teleport(Arena nextArena) {
         if (nextArena != null) { //Si l'arène n'est pas null
@@ -112,7 +104,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 winnerArena.restart(); //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
                 for (UUID uuids : winnerArena.getAlluuids()) {
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
-                    waitingRoom.addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
+                    winnerArena.getWaitingRoom().addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
                 }
             }, 10 * 20);
         }
@@ -186,7 +178,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 for (UUID uuids : winnerTeam.getUuidList()) {
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
                     //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
-                    waitingRoom.addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
+                    winnerArena.getWaitingRoom().addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
                 }
             }, 10 * 20);
         }

@@ -3,7 +3,6 @@ package fr.pandamcbe.mGConstructorAPI;
 import fr.pandamcbe.mGConstructorAPI.listeners.ParameterListeners;
 import fr.pandamcbe.mGConstructorAPI.managers.ArenaManager;
 import fr.pandamcbe.mGConstructorAPI.managers.GameSessionManager;
-import fr.pandamcbe.mGConstructorAPI.managers.WaitingRoom;
 import fr.pandamcbe.mgapi.serverutilapi.scoreboards.ScoreboardManager;
 import net.luckperms.api.LuckPerms;
 import org.bukkit.Bukkit;
@@ -16,7 +15,6 @@ public final class MGConstructorAPI extends JavaPlugin {
     public LuckPerms luckPerms;
     public ArenaManager arenaManager = new ArenaManager();
     public GameSessionManager gameManager = new GameSessionManager();
-    public WaitingRoom waitingRoomManager = new WaitingRoom();
     public Team team = new Team();
 
     private ScoreboardManager scoreboardManager;
@@ -33,7 +31,6 @@ public final class MGConstructorAPI extends JavaPlugin {
         }
 
         this.scoreboardManager = new ScoreboardManager();
-        this.waitingRoomManager = new WaitingRoom();
         super.onEnable();
     }
 
@@ -54,10 +51,6 @@ public final class MGConstructorAPI extends JavaPlugin {
 
     public GameSessionManager getGameManager() {
         return gameManager;
-    }
-
-    public WaitingRoom getWaitingRoomManager() {
-        return waitingRoomManager;
     }
 
     public Team getTeam() {

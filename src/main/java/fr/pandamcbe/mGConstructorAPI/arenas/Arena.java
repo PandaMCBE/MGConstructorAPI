@@ -2,6 +2,7 @@ package fr.pandamcbe.mGConstructorAPI.arenas;
 
 import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.managers.OptionalsHooksManager;
+import fr.pandamcbe.mGConstructorAPI.managers.WaitingRoom;
 import org.bukkit.Location;
 import org.bukkit.Material;
 
@@ -23,6 +24,7 @@ public abstract class Arena extends OptionalsHooksManager {
     public int startingTimer;
     public int maxPlayersAllowed;
     public int minimumPlayers;
+    public WaitingRoom waitingRoom;
 //    private World world;
 
     public List<UUID> getAlluuids() {
@@ -143,6 +145,14 @@ public abstract class Arena extends OptionalsHooksManager {
 
     public void setMinimumPlayers(int minimumPlayers) {
         this.minimumPlayers = minimumPlayers;
+    }
+
+    public WaitingRoom getWaitingRoom() {
+        return waitingRoom;
+    }
+
+    public void setWaitingRoom(WaitingRoom waitingRoom) {
+        this.waitingRoom = waitingRoom;
     }
 
     public void restart() {

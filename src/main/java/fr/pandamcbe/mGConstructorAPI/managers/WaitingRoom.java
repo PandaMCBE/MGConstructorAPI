@@ -2,6 +2,7 @@ package fr.pandamcbe.mGConstructorAPI.managers;
 
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
+import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mGConstructorAPI.scoreboards.samaboardsclasses.PersonalScoreboard;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -9,16 +10,18 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class WaitingRoom extends OptionalsHooksManager{
 
-    public List<UUID> waitingRoom;
+    public Queue<List<UUID>> queue;
     public Location location;
 
     public WaitingRoom(){
         this.location = new Location(Bukkit.getWorld("world"), 0, 0, 0);
-        this.waitingRoom = new ArrayList<>();
+        this.queue = new ConcurrentLinkedQueue<>();
     }
 
     public Location getLocation() {
@@ -29,38 +32,61 @@ public class WaitingRoom extends OptionalsHooksManager{
         this.location = location;
     }
 
-    public List<UUID> getWaitingRoom() {
-        return waitingRoom;
+    public Queue<List<UUID>> getQueue() {
+        return queue;
     }
 
-    public void setWaitingRoom(List<UUID> waitingRoom) {
-        this.waitingRoom = waitingRoom;
+    public void setQueue(Queue<List<UUID>> queue) {
+        this.queue = queue;
     }
 
     final private ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
 
-    public void waiting(List<Arena> arenaList, Arena arena, Player p){
+    public List<UUID> getWaitingListByPlayer(UUID uuid){
+        for(List<UUID> list : queue){
+            if(list.contains(uuid)){
+                return list;
+            }
+        }
+        return null;
+    }
 
-        if(arena == null) {
-            p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible :( Revenez plus-tard !"); //Si la méthode n'avait pas pu retourner une arène, celle-ci est donc null car aucune n'est dispo, on l'envoie par message au nouveau joueur (tous les joueurs qui sont passés par cette méthode).
-        } else if (arena.getAlluuids().size() < arena.getMinimumPlayers()) {
+    public void waiting(List<Arena> arenaList, Arena arena, Player p){
+        if(arenaManager.getArenaByPlayer(p.getUniqueId(), arenaList) == null) {
+            if (queue.isEmpty()) {
+                queue.add(new ArrayList<>());
+            }
+            for (List<UUID> list : queue) {
+                if (!list.contains(p.getUniqueId()) && list.size() < arena.getMaxPlayersAllowed()) {
+                    list.add(p.getUniqueId());
+                } else {
+                    List<UUID> newGroup = new ArrayList<>();
+                    newGroup.add(p.getUniqueId());
+                    queue.add(newGroup);
+                }
+            }
+            p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
+        }
+
+        if (arena.getAlluuids().size() < arena.getMinimumPlayers()) {
+            if(!arena.getState().equals(State.WAITING)){
+                arena.setState(State.WAITING);
+            }
             p.sendMessage("§b§lMG-Land > §c§lNombre de joueurs minimum : §e§l" + arena.getMinimumPlayers());
         }
-        if(!getWaitingRoom().contains(p.getUniqueId())) {
-            getWaitingRoom().add(p.getUniqueId());
-        }
-        if(Bukkit.getOnlinePlayers().contains(p)) {
-            p.teleport(getLocation());
-            MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, getWaitingRoom(), p, getPrefix()), p);
-        }
+
+        p.teleport(getLocation());
+        MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, getWaitingListByPlayer(p.getUniqueId()), p, getPrefix()), p);
 
     }
 
     public void addWaitingPlayerToArena(Arena nextArena, List<Arena> arenaList){
-        if (!waitingRoom.isEmpty()) { //Si la taille du nombre de joueurs dans la liste de file d'attente est supérieure à 2
-            for (UUID waiting : waitingRoom) { //Pour chaque joueur contenu dans la file d'attente
-                if (arenaManager.getArenaByPlayer(waiting, arenaList) == null) //S'il n'existe pas d'arène où ces joueurs contenus en attente sont présents
-                    arenaManager.joinArena(arenaList, nextArena, Bukkit.getPlayer(waiting)); //Ajouter ces joueurs dans la prochaine partie
+        if (!queue.isEmpty()) {
+            List<UUID> waitingList = queue.poll();
+            for (UUID waiting : waitingList) {
+                if(arenaManager.getArenaByPlayer(waiting, arenaList) == null) {
+                    arenaManager.joinArena(arenaList, nextArena, Bukkit.getPlayer(waiting));
+                }
             }
         }
     }

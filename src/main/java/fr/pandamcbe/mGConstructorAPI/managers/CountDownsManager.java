@@ -19,7 +19,7 @@ public class CountDownsManager {
         this.arena = arena; //Initialisation de la variable arena avec celle qui est donnée par le constructeur
     }
 
-    public void runNewGame(BukkitRunnable runnable,List<UUID> waitingRoom, Player pls) {
+    public void runNewGame(BukkitRunnable runnable, Player pls) {
         if (arena == null || arena.getAlluuids().size() <= 1) { //Si l'arène est null ou qu'elle ne contient pas de joueurs ou un seul
             runnable.cancel(); //Annuler le runnable
             return; //Arrêter l'exécution du code
@@ -40,7 +40,8 @@ public class CountDownsManager {
             case 0:
                 runnable.cancel(); //Arrêter le timer
                 MGConstructorAPI.getInstance().getScoreboardManager().onLogout(pls); //Retirer le scoreboard précédemment associé au joueur quand la partie va commencer une manche
-                waitingRoom.remove(pls.getUniqueId()); //Retirer les joueurs de la liste de file d'attente
+                arena.setState(State.PLAYING);
+                //Retirer les joueurs de la liste de file d'attente
 
                 break;
             default:
@@ -54,6 +55,7 @@ public class CountDownsManager {
             runnable.cancel(); //Annuler le timer
             return;// Arrêter l'exécution du code
         }
+
         for (UUID uuid : arena.getAlluuids()) { //Pour chaque joueur dans la liste d'ensemble de l'arène
             Player p = Bukkit.getPlayer(uuid);
             if (!p.isOnline()) { //Si un joueur n'est pas en ligne
@@ -90,9 +92,6 @@ public class CountDownsManager {
                 if (!arena.getInGamePlayers().contains(p.getUniqueId())) { //Si la liste des joueurs non éliminés ne contient pas le joueur
                     arena.getInGamePlayers().add(p.getUniqueId()); //Ajouter le joueur à la liste
                 }
-            }
-            if (!arena.getState().equals(State.PLAYING)) {
-                arena.setState(State.PLAYING);
             }
         }
 

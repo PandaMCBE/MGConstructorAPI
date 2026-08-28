@@ -6,11 +6,11 @@ D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\State.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\managers\OptionalsHooksManager.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\commands\getPlayerStatsCmd.java
-D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\Team.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\listeners\ParameterListeners.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\MGConstructorAPI.java
-D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\DuelArena.java
+D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\Team.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\Arena.java
+D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\TeamArena.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\arenas\MGArena.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\managers\GameSessionManager.java
 D:\OneDrive\Programmation_java\MG-Land-Plugin\MGConstructorAPI\src\main\java\fr\pandamcbe\mGConstructorAPI\managers\CountDownsManager.java
