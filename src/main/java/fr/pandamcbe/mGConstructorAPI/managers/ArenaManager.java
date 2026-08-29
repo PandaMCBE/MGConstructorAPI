@@ -31,8 +31,7 @@ public class ArenaManager extends OptionalsHooksManager {
     public Arena getNextArena(List<Arena> arenaList, String mgmode) { //Récupérer une arène non démarrée
         for (Arena arena : arenaList) { //Pour chaque objet Arena qui sont dans la liste définie de toutes les arènes existantes
             if (arena.getMode().equals(mgmode)) {
-                if (arena.getState().equals(State.WAITING) ||
-                        arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
+                if (arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING) || arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
                     return arena; //retourner l'arène qui respecte ces conditions et arrêter la boucle
                 }
             }
@@ -51,7 +50,7 @@ public class ArenaManager extends OptionalsHooksManager {
     public void lookForArena(List<Arena> arenaList, String mgmode, Player player){
         for (Arena arena : arenaList) { //Pour chaque objet Arena qui sont dans la liste définie de toutes les arènes existantes
             if (arena.getMode().equals(mgmode)) {
-                if (arena.getState().equals(State.WAITING) || arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
+                if (arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING) || arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
                     joinArena(arenaList, arena, player);
                 } else {
                     arena.waitingRoom.waiting(arenaList, arena, player);
@@ -75,13 +74,16 @@ public class ArenaManager extends OptionalsHooksManager {
             //d'ailleurs trouver un meilleur nom.
             team.addPlayer((TeamArena) nextArena, p);
 
-            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers()) { //Si la liste de file d'attente depuis la classe Main est supérieur ou égale 2. C'est pour lancer une partie même n'étant peu.
-                if(nextArena.getAlluuids().size() == nextArena.getMaxPlayersAllowed()){
-                    if (!nextArena.getState().equals(State.PLAYING)) {
-                        nextArena.setState(State.PLAYING);
-                    }
+            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers() && nextArena.getState().equals(State.WAITING)) { //Si la liste de file d'attente depuis la classe Main est supérieur ou égale 2. C'est pour lancer une partie même n'étant peu.
+                if(!nextArena.getState().equals(State.STARTING)) {
+                    nextArena.setState(State.STARTING);
                 }
                 startCountDown(nextArena);
+            }
+            if(nextArena.getAlluuids().size() == nextArena.getMaxPlayersAllowed()){
+                if (!nextArena.getState().equals(State.PLAYING)) {
+                    nextArena.setState(State.PLAYING);
+                }
             }
         }
     }

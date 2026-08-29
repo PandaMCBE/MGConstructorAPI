@@ -40,19 +40,22 @@ public class WaitingRoom extends OptionalsHooksManager{
 
     final private ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
 
-    public List<UUID> getWaitingListByPlayer(UUID uuid) {
-        for (Map<String, List<UUID>> map : queue) {
-            for (List<UUID> list : map.values()) {
-                if (list.contains(uuid)) {
-                    return list;
+    public List<UUID> getWaitingListByPlayer(List<Arena> arenaList, UUID uuid) {
+        String waitingReason = waitingReason(arenaList, uuid);
+        List<Map<String, List<UUID>>> filtered = queue.stream().filter(stringListMap ->
+                (stringListMap.containsKey(waitingReason))).collect(Collectors.toList());
+        if(!filtered.isEmpty()) {
+            for (Map<String, List<UUID>> map : filtered) {
+                if(map.get(waitingReason).contains(uuid)) {
+                    return map.get(waitingReason);
                 }
             }
         }
         return null;
     }
 
-    public String waitingReason(List<Arena> arenaList, Player player){
-        Arena arena = arenaManager.getArenaByPlayer(player.getUniqueId(), arenaList);
+    public String waitingReason(List<Arena> arenaList, UUID uuid){
+        Arena arena = arenaManager.getArenaByPlayer(uuid, arenaList);
         if(arena == null) {
             return "noArenaAvailable";
         } else if(arena.getAlluuids().size() < arena.getMinimumPlayers()){
@@ -62,7 +65,7 @@ public class WaitingRoom extends OptionalsHooksManager{
     }
 
     public void waiting(List<Arena> arenaList, Arena arena, Player p){
-        String waitingReason = waitingReason(arenaList, p);
+        String waitingReason = waitingReason(arenaList, p.getUniqueId());
             List<Map<String, List<UUID>>> filtered = queue.stream().filter(stringListMap ->
                 (stringListMap.containsKey(waitingReason) && !stringListMap.get(waitingReason).contains(p.getUniqueId()) && stringListMap.get(waitingReason).size() < arena.getMaxPlayersAllowed())).collect(Collectors.toList());
             if(!filtered.isEmpty()) {
@@ -88,7 +91,7 @@ public class WaitingRoom extends OptionalsHooksManager{
             }
 
         p.teleport(getLocation());
-        MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, getWaitingListByPlayer(p.getUniqueId()), p, getPrefix()), p);
+        MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, getWaitingListByPlayer(arenaList, p.getUniqueId()), p, getPrefix()), p);
 
     }
 

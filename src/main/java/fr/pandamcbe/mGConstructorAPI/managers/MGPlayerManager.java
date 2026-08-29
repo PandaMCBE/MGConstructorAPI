@@ -22,7 +22,7 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
         UUID leaverUUID = leaver.getUniqueId();
         if (teamArena != null) {
 
-            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
+            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(arenaList, leaverUUID);
             waitingList.remove(leaverUUID);
 
             teamArena.getAlluuids().remove(leaverUUID);

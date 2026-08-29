@@ -49,10 +49,11 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
         UUID leaverUUID = leaver.getUniqueId();
 
         if (teamArena != null) {
-            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
+            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(arenaList, leaverUUID);
             waitingList.remove(leaverUUID);
 
             teamArena.getAlluuids().remove(leaverUUID);
+            teamArena.getInGamePlayers().remove(leaverUUID);
             team.getTeamByPlayer(leaver, teamArena).getUuidList().remove(leaverUUID);
 
             if (teamArena.getAlluuids().size() == 1) {
