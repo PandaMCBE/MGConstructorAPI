@@ -2,3 +2,6 @@ name: MGConstructorAPI
 version: '1.0'
 main: fr.pandamcbe.mGConstructorAPI.MGConstructorAPI
 author: PandaMCBE
+depend:
+  - MGApi
+  - DecentHolograms
