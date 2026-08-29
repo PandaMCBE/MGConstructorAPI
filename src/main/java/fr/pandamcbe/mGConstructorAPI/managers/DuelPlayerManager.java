@@ -8,6 +8,7 @@ import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
 import fr.pandamcbe.mgapi.Main;
 import fr.pandamcbe.mgapi.serverutilapi.enums_strings.AllNames;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.List;
@@ -49,25 +50,30 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
         UUID leaverUUID = leaver.getUniqueId();
 
         if (teamArena != null) {
-            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(arenaList, leaverUUID);
-            waitingList.remove(leaverUUID);
-
             teamArena.getAlluuids().remove(leaverUUID);
             teamArena.getInGamePlayers().remove(leaverUUID);
             team.getTeamByPlayer(leaver, teamArena).getUuidList().remove(leaverUUID);
 
-            if (teamArena.getAlluuids().size() == 1) {
-                Player winner = gameManager.getOpponent(leaverUUID, teamArena);
-                if (winner.isOnline()) {
-                    if (!waitingList.contains(winner.getUniqueId()) && teamArena.getState() == State.PLAYING) {
-                        breakOrPlace(teamArena);
-                        teamArena.restart();
-                        Team pTeam = team.getTeamByPlayer(winner, teamArena);
-                        pTeam.getUuidList().remove(winner.getUniqueId());
-                        Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), winner);
-                        arena.getWaitingRoom().addWaitingPlayerToArena(teamArena, arenaList);
-
+            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
+            if (waitingList != null) {
+                waitingList.remove(leaverUUID);
+                if (!waitingList.isEmpty()) {
+                    if (waitingList.size() == 1) {
+                        Player waitingPlayer = Bukkit.getPlayer(waitingList.getFirst());
+                        if (waitingPlayer.isOnline()) {
+                            waitingList.remove(waitingPlayer.getUniqueId());
+                            Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), waitingPlayer);
+                        }
                     }
+                } else if(teamArena.getAlluuids().size() == 1) {
+                    Player waitingPlayer = gameManager.getOpponent(leaverUUID, arena);
+                    if (!waitingList.contains(waitingPlayer.getUniqueId()) && teamArena.getState() == State.PLAYING) {
+                        breakOrPlace(teamArena);
+                    }
+                    teamArena.restart();
+                    Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), waitingPlayer);
+                    arena.getWaitingRoom().addQueueToArena(teamArena, arenaList);
+
                 }
             }
         }

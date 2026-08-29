@@ -7,18 +7,15 @@ import fr.pandamcbe.mgapi.serverutilapi.scoreboards.ObjectiveSign;
 import org.bukkit.entity.Player;
 
 import java.util.List;
-import java.util.UUID;
 
 public class PersonalScoreboard extends fr.pandamcbe.mgapi.serverutilapi.scoreboards.PersonalScoreboard {
 
     private final MGConstructorAPI main = MGConstructorAPI.getInstance();
     private final List<Arena> arenaList;
-    private final List<UUID> waitingPlayers;
 
-    public PersonalScoreboard(List<Arena> arenas, List<UUID> waitingRoom, Player player, String name){
+    public PersonalScoreboard(List<Arena> arenas, Player player, String name){
         this.player = player;
         arenaList = arenas;
-        waitingPlayers = waitingRoom;
         uuid = player.getUniqueId();
         objectiveSign = new ObjectiveSign("sidebar", "§l§n"+ name);
         reloadData();
@@ -35,15 +32,23 @@ public class PersonalScoreboard extends fr.pandamcbe.mgapi.serverutilapi.scorebo
         Arena arena = main.getArenaManager().getArenaByPlayer(player.getUniqueId(), arenaList);
 
             if(player != null) {//Scoreboard en attente
-                    if(arena.getState() == State.WAITING) {
+                    if(arena.getState() == State.WAITING || arena.getState() == State.STARTING) {
                         this.objectiveSign.setLine(1, "§8§m------------");
-                            this.objectiveSign.setLine(2, "§7En attente : §f" + waitingPlayers);
+                            this.objectiveSign.setLine(2, "§7En attente : §f" + waitingCount(arena));
                         this.objectiveSign.setLine(3, "§7Débute dans : §f" + arena.getStartingTimer() + "§fs");
-                        this.objectiveSign.setLine(4, "§7Arène : §f" + main.getArenaManager().getArena(arena));
+                        this.objectiveSign.setLine(4, "§7Arène : §f" + main.getArenaManager().getArena(main.getArenaManager().getNextArena(arenaList, arena.getMode())));
                         this.objectiveSign.setLine(5, "§8§m-----------");
                         this.objectiveSign.setLine(6, ip);
                     }
                     this.objectiveSign.updateLines();
             }
+    }
+
+    public int waitingCount (Arena arena) {
+        if (arena.getWaitingRoom().getWaitingListByPlayer(uuid) != null) {
+            return arena.getWaitingRoom().getWaitingListByPlayer(uuid).size();
+        } else {
+            return arena.getAlluuids().size();
+        }
     }
 }

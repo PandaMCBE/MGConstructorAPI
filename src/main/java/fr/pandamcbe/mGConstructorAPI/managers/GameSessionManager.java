@@ -103,7 +103,7 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 winnerArena.restart(); //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
                 for (UUID uuids : winnerArena.getAlluuids()) {
-                    winnerArena.getWaitingRoom().addWaitingPlayerToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
+                    winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList); //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
                 }
             }, 10 * 20);
@@ -176,7 +176,7 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 winnerArena.restart();
                 for (UUID uuids : winnerTeam.getUuidList()) {
-                    winnerArena.getWaitingRoom().addWaitingPlayerToArena(winnerArena, arenaList);
+                    winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
                     customJoinEvent(Bukkit.getPlayer(uuids)); //Faire rejoindre la salle d'attente au joueur
                     //Redémarrer l'arène pour qu'elle soit marquée comme inoccupée
                      //Faire rejoindre tous les joueurs en attente à cette arène, si aucune ne leur était disponible jusque-là

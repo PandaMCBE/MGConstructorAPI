@@ -22,7 +22,7 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
         UUID leaverUUID = leaver.getUniqueId();
         if (teamArena != null) {
 
-            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(arenaList, leaverUUID);
+            List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
             waitingList.remove(leaverUUID);
 
             teamArena.getAlluuids().remove(leaverUUID);
@@ -33,15 +33,17 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
                 if (player.isOnline()) {
                     if (!waitingList.contains(player.getUniqueId()) && arena.getState() == State.PLAYING) {
                         arenaManager.breakOrPlace(teamArena);
+                    }
                         teamArena.restart();
-                        arena.getWaitingRoom().addWaitingPlayerToArena(teamArena, arenaList);
+                        arena.getWaitingRoom().addQueueToArena(teamArena, arenaList);
                         customJoinEvent(player);
                     } else {
                         teamArena.setState(State.WAITING);
                         teamArena.setStartingTimer(30);
                     }
-                }
+                } else if((teamArena.getState().equals(State.STARTING) || teamArena.getState().equals(State.WAITING))) {
+                    teamArena.getWaitingRoom().addWaitingPlayerToArena(teamArena, arenaList);
+                 }
             }
         }
-    }
 }

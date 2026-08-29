@@ -8,7 +8,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.util.List;
 import java.util.UUID;
 
 public class CountDownsManager {
@@ -51,7 +50,7 @@ public class CountDownsManager {
         }
     }
 
-    public void runNewRound(BukkitRunnable runnable, List<Arena> arenaList, int timer, Sound countingSound, Sound finalSound) {
+    public void runNewRound(BukkitRunnable runnable, int timer, Sound countingSound, Sound finalSound) {
         if (arena == null || arena.getAlluuids().size() <= 1) //Si l'objet Arena est null ou sa liste d'ensemble de joueurs a une taille inférieure ou égale à 1
         {
             runnable.cancel(); //Annuler le timer
@@ -90,7 +89,6 @@ public class CountDownsManager {
                 runnable.cancel();
                 p.sendTitle("§a§lGO!", "");
                 p.playSound(p.getLocation(), finalSound, 1.0f, 1.0f);
-                arena.getWaitingRoom().getWaitingListByPlayer(arenaList, p.getUniqueId()).remove(p.getUniqueId()); //Retirer les joueurs de la liste de file d'attente
                 if (!arena.getInGamePlayers().contains(p.getUniqueId())) { //Si la liste des joueurs non éliminés ne contient pas le joueur
                     arena.getInGamePlayers().add(p.getUniqueId()); //Ajouter le joueur à la liste
                 }

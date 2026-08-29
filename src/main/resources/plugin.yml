@@ -4,4 +4,3 @@ main: fr.pandamcbe.mGConstructorAPI.MGConstructorAPI
 author: PandaMCBE
 depend:
   - MGApi
-  - DecentHolograms
