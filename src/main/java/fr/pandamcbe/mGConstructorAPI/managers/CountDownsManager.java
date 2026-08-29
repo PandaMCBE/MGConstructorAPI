@@ -40,7 +40,9 @@ public class CountDownsManager {
             case 0:
                 runnable.cancel(); //Arrêter le timer
                 MGConstructorAPI.getInstance().getScoreboardManager().onLogout(pls); //Retirer le scoreboard précédemment associé au joueur quand la partie va commencer une manche
-                arena.setState(State.PLAYING);
+               if(!arena.getState().equals(State.PLAYING)) {
+                   arena.setState(State.PLAYING);
+               }
                 //Retirer les joueurs de la liste de file d'attente
 
                 break;

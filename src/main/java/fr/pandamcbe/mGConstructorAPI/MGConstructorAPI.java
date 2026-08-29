@@ -13,9 +13,9 @@ public final class MGConstructorAPI extends JavaPlugin {
 
     private static MGConstructorAPI INSTANCE;
     public LuckPerms luckPerms;
-    public ArenaManager arenaManager = new ArenaManager();
-    public GameSessionManager gameManager = new GameSessionManager();
-    public Team team = new Team();
+    public ArenaManager arenaManager;
+    public GameSessionManager gameManager;
+    public Team team;
 
     private ScoreboardManager scoreboardManager;
 
@@ -29,6 +29,10 @@ public final class MGConstructorAPI extends JavaPlugin {
         if (provider != null) {
             luckPerms = provider.getProvider();
         }
+
+        arenaManager = new ArenaManager();
+        gameManager = new GameSessionManager();
+        team = new Team();
 
         this.scoreboardManager = new ScoreboardManager();
         super.onEnable();
