@@ -25,13 +25,15 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
             List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
             waitingList.remove(leaverUUID);
 
-            teamArena.getAlluuids().remove(leaverUUID);
-            teamArena.getInGamePlayers().remove(leaverUUID);
-            team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
             if (teamArena.getAlluuids().size() == 1) {
                 Player player = gameManager.getOpponent(leaverUUID, teamArena);
                 if (player.isOnline()) {
-                    if (!waitingList.contains(player.getUniqueId()) && arena.getState() == State.PLAYING) {
+                    if(!waitingList.contains(player.getUniqueId())) {
+                        teamArena.getAlluuids().remove(leaverUUID);
+                        teamArena.getInGamePlayers().remove(leaverUUID);
+                        team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
+                    }
+                    if (arena.getState() == State.PLAYING) {
                         arenaManager.breakOrPlace(teamArena);
                     }
                         teamArena.restart();

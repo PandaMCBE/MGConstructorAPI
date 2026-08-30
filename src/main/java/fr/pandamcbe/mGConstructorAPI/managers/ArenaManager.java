@@ -66,7 +66,13 @@ public class ArenaManager extends OptionalsHooksManager {
 
             if(!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
                 nextArena.getAlluuids().add(uuid);
-                nextArena.waitingRoom.waiting(arenaList, nextArena, p);
+                if(nextArena.getAlluuids().size() != nextArena.getMaxPlayersAllowed()) {
+                    nextArena.waitingRoom.waiting(arenaList, nextArena, p);
+                } else {
+                    if (!nextArena.getState().equals(State.PLAYING)) {
+                        nextArena.setState(State.PLAYING);
+                    }
+                }
             }
 
             //Comment être sûr que les joueurs d'un duel soient toujours mis en relation même après avoir été placé en attente ?
@@ -79,11 +85,6 @@ public class ArenaManager extends OptionalsHooksManager {
                     nextArena.setState(State.STARTING);
                 }
                 startCountDown(nextArena);
-            }
-            if(nextArena.getAlluuids().size() == nextArena.getMaxPlayersAllowed()){
-                if (!nextArena.getState().equals(State.PLAYING)) {
-                    nextArena.setState(State.PLAYING);
-                }
             }
         }
     }

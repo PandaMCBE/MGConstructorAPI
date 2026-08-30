@@ -50,9 +50,6 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
         UUID leaverUUID = leaver.getUniqueId();
 
         if (teamArena != null) {
-            teamArena.getAlluuids().remove(leaverUUID);
-            teamArena.getInGamePlayers().remove(leaverUUID);
-            team.getTeamByPlayer(leaver, teamArena).getUuidList().remove(leaverUUID);
 
             List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
             if (waitingList != null) {
@@ -65,15 +62,20 @@ public abstract class DuelPlayerManager extends OptionalsHooksManager {
                             Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), waitingPlayer);
                         }
                     }
-                } else if(teamArena.getAlluuids().size() == 1) {
-                    Player waitingPlayer = gameManager.getOpponent(leaverUUID, arena);
-                    if (!waitingList.contains(waitingPlayer.getUniqueId()) && teamArena.getState() == State.PLAYING) {
-                        breakOrPlace(teamArena);
-                    }
-                    teamArena.restart();
-                    Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), waitingPlayer);
-                    arena.getWaitingRoom().addQueueToArena(teamArena, arenaList);
+                } else {
+                    teamArena.getAlluuids().remove(leaverUUID);
+                    teamArena.getInGamePlayers().remove(leaverUUID);
+                    team.getTeamByPlayer(leaver, teamArena).getUuidList().remove(leaverUUID);
+                    if(teamArena.getAlluuids().size() == 1) {
+                        Player waitingPlayer = gameManager.getOpponent(leaverUUID, arena);
+                        if (!waitingList.contains(waitingPlayer.getUniqueId()) && teamArena.getState() == State.PLAYING) {
+                            breakOrPlace(teamArena);
+                        }
+                        teamArena.restart();
+                        Main.getInstance().getProxyMessaging().connectToAnotherServer(AllNames.LOBBY.getName(), waitingPlayer);
+                        arena.getWaitingRoom().addQueueToArena(teamArena, arenaList);
 
+                    }
                 }
             }
         }
