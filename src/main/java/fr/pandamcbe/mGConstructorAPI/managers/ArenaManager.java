@@ -5,6 +5,7 @@ import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -66,8 +67,8 @@ public class ArenaManager extends OptionalsHooksManager {
 
             if(!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
                 nextArena.getAlluuids().add(uuid);
-                if(nextArena.getAlluuids().size() != nextArena.getMaxPlayersAllowed()) {
-                    nextArena.waitingRoom.waiting(arenaList, nextArena, p);
+                if(nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()) {
+                    Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), ()-> nextArena.waitingRoom.waiting(arenaList, nextArena, p), 3 * 20) ;
                 } else {
                     if (!nextArena.getState().equals(State.PLAYING)) {
                         nextArena.setState(State.PLAYING);
@@ -75,9 +76,6 @@ public class ArenaManager extends OptionalsHooksManager {
                 }
             }
 
-            //Comment être sûr que les joueurs d'un duel soient toujours mis en relation même après avoir été placé en attente ?
-            //Envisager le retrait de joinArena de ArenaManager pour le placer dans MGPlayerManager et MGDuelManager qui devraient
-            //d'ailleurs trouver un meilleur nom.
             team.addPlayer((TeamArena) nextArena, p);
 
             if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers() && nextArena.getState().equals(State.WAITING)) { //Si la liste de file d'attente depuis la classe Main est supérieur ou égale 2. C'est pour lancer une partie même n'étant peu.

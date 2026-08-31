@@ -23,19 +23,18 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
         if (teamArena != null) {
 
             List<UUID> waitingList = arena.getWaitingRoom().getWaitingListByPlayer(leaverUUID);
-            waitingList.remove(leaverUUID);
-
-            if (teamArena.getAlluuids().size() == 1) {
-                Player player = gameManager.getOpponent(leaverUUID, teamArena);
-                if (player.isOnline()) {
-                    if(!waitingList.contains(player.getUniqueId())) {
-                        teamArena.getAlluuids().remove(leaverUUID);
-                        teamArena.getInGamePlayers().remove(leaverUUID);
-                        team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
-                    }
-                    if (arena.getState() == State.PLAYING) {
-                        arenaManager.breakOrPlace(teamArena);
-                    }
+            if(waitingList != null) {
+                waitingList.remove(leaverUUID);
+            } else {
+                teamArena.getAlluuids().remove(leaverUUID);
+                teamArena.getInGamePlayers().remove(leaverUUID);
+                team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
+                if (teamArena.getAlluuids().size() == 1) {
+                    Player player = gameManager.getOpponent(leaverUUID, teamArena);
+                    if (player.isOnline()) {
+                        if (arena.getState() == State.PLAYING) {
+                            arenaManager.breakOrPlace(teamArena);
+                        }
                         teamArena.restart();
                         arena.getWaitingRoom().addQueueToArena(teamArena, arenaList);
                         customJoinEvent(player);
@@ -45,7 +44,9 @@ public abstract class MGPlayerManager extends OptionalsHooksManager{
                     }
                 } else if((teamArena.getState().equals(State.STARTING) || teamArena.getState().equals(State.WAITING))) {
                     teamArena.getWaitingRoom().addWaitingPlayerToArena(teamArena, arenaList);
-                 }
+                }
+            }
+
             }
         }
 }
