@@ -52,8 +52,11 @@ public class ArenaManager extends OptionalsHooksManager {
         for (Arena arena : arenaList) { //Pour chaque objet Arena qui sont dans la liste définie de toutes les arènes existantes
             if (arena.getMode().equals(mgmode)) {
                 if (arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING) || arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
+                    System.out.println("NextArena-State : "+ arena.getState());
                     joinArena(arenaList, arena, player);
+                    break;
                 } else {
+                    System.out.println("waiting: "+arena.getState());
                     arena.waitingRoom.waiting(arenaList, arena, player);
                 }
             }
@@ -67,19 +70,20 @@ public class ArenaManager extends OptionalsHooksManager {
 
             if(!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
                 nextArena.getAlluuids().add(uuid);
+
                 if(nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()) {
-                    Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), ()-> nextArena.waitingRoom.waiting(arenaList, nextArena, p), 3 * 20) ;
+                    Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), ()-> nextArena.waitingRoom.waiting(arenaList, nextArena, p), 3 * 20);
                 } else {
+                    System.out.println("Count : "+nextArena.getAlluuids().size());
                     if (!nextArena.getState().equals(State.PLAYING)) {
                         nextArena.setState(State.PLAYING);
                     }
                 }
             }
-
             team.addPlayer((TeamArena) nextArena, p);
 
-            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers() && nextArena.getState().equals(State.WAITING)) { //Si la liste de file d'attente depuis la classe Main est supérieur ou égale 2. C'est pour lancer une partie même n'étant peu.
-                if(!nextArena.getState().equals(State.STARTING)) {
+            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers()) {
+                if(nextArena.getState().equals(State.WAITING)) {
                     nextArena.setState(State.STARTING);
                 }
                 startCountDown(nextArena);

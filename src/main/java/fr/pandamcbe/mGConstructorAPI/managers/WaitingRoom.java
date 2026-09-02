@@ -64,28 +64,30 @@ public class WaitingRoom extends OptionalsHooksManager {
 
     public void waiting(List<Arena> arenaList, Arena arena, Player p) {
         String waitingReason = waitingReason(arenaList, p.getUniqueId());
-        if (waitingReason.equalsIgnoreCase("notArenaAvailable")) {
-            if (queue.isEmpty()) {
-                queue.add(new ArrayList<>());
-            }
-            for (List<UUID> list : queue) {
-                if (!list.contains(p.getUniqueId()) && list.size() < arena.getMaxPlayersAllowed()) {
-                    list.add(p.getUniqueId());
-                } else {
-                    List<UUID> newGroup = new ArrayList<>();
-                    newGroup.add(p.getUniqueId());
-                    queue.add(newGroup);
+        if(waitingReason != null) {
+            if (waitingReason.equalsIgnoreCase("notArenaAvailable")) {
+                if (queue.isEmpty()) {
+                    queue.add(new ArrayList<>());
                 }
+                for (List<UUID> list : queue) {
+                    if (!list.contains(p.getUniqueId()) && list.size() < arena.getMaxPlayersAllowed()) {
+                        list.add(p.getUniqueId());
+                    } else {
+                        List<UUID> newGroup = new ArrayList<>();
+                        newGroup.add(p.getUniqueId());
+                        queue.add(newGroup);
+                    }
+                }
+                p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
+            } else if (waitingReason.equalsIgnoreCase("notEnoughPlayers")) {
+                if (!arena.getState().equals(State.WAITING)) {
+                    arena.setState(State.WAITING);
+                }
+                p.sendMessage("§b§lMG-Land > §c§lNombre de joueurs minimum : §e§l" + arena.getMinimumPlayers());
             }
-            p.sendMessage("§b§lMG-Land > §c§lAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
-        } else if(waitingReason.equalsIgnoreCase("notEnoughPlayers")) {
-            if (!arena.getState().equals(State.WAITING)) {
-                arena.setState(State.WAITING);
-            }
-            p.sendMessage("§b§lMG-Land > §c§lNombre de joueurs minimum : §e§l" + arena.getMinimumPlayers());
+            p.teleport(getLocation());
+            MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, p, getPrefix()), p);
         }
-        p.teleport(getLocation());
-        MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, p, getPrefix()), p);
     }
 
     public void addQueueToArena(Arena nextArena, List<Arena> arenaList) {
