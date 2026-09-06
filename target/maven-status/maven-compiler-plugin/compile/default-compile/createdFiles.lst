@@ -1,5 +1,4 @@
 fr\pandamcbe\mGConstructorAPI\managers\WaitingRoom.class
-fr\pandamcbe\mGConstructorAPI\managers\DuelPlayerManager.class
 fr\pandamcbe\mGConstructorAPI\scoreboards\samaboardsclasses\PersonalScoreboard.class
 fr\pandamcbe\mGConstructorAPI\managers\GameSessionManager.class
 fr\pandamcbe\mGConstructorAPI\arenas\Arena.class
@@ -10,7 +9,6 @@ fr\pandamcbe\mGConstructorAPI\arenas\MGArena.class
 fr\pandamcbe\mGConstructorAPI\managers\GameSessionManager$1.class
 fr\pandamcbe\mGConstructorAPI\managers\ArenaManager.class
 fr\pandamcbe\mGConstructorAPI\managers\CountDownsManager.class
-fr\pandamcbe\mGConstructorAPI\managers\MGPlayerManager.class
 fr\pandamcbe\mGConstructorAPI\Team.class
 fr\pandamcbe\mGConstructorAPI\arenas\TeamArena.class
 fr\pandamcbe\mGConstructorAPI\commands\Commands.class

@@ -13,9 +13,10 @@ import java.util.UUID;
 public class CountDownsManager {
 
     private final Arena arena; //Instanciation de la classe Arena avec une variable de type privée et constante
-    private final ArenaManager arenaManager = MGConstructorAPI.getInstance().getArenaManager();
-    public CountDownsManager(Arena arena) {
+    private final ArenaManager arenaManager;
+    public CountDownsManager(Arena arena, ArenaManager arenaManager) {
         this.arena = arena; //Initialisation de la variable arena avec celle qui est donnée par le constructeur
+        this.arenaManager = arenaManager;
     }
 
     public void runNewGame(BukkitRunnable runnable, Player pls) {

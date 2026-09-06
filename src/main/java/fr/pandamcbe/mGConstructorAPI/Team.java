@@ -68,11 +68,11 @@ import java.util.UUID;
             }
             return null;
         }
-        public void addPlayer(TeamArena nextArena, Player p) {
+        public void addPlayer(TeamArena nextArena, UUID uuid) {
             if (getNextTeam(nextArena, nextArena.getTotalTeams()) != null) {
                 Team nextTeam = getNextTeam(nextArena, nextArena.getTotalTeams());
-                if (!nextTeam.getUuidList().contains(p.getUniqueId()))
-                    nextTeam.getUuidList().add(p.getUniqueId());
+                if (!nextTeam.getUuidList().contains(uuid))
+                    nextTeam.getUuidList().add(uuid);
             }
         }
 
