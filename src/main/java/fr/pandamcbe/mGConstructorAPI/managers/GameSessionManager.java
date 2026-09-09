@@ -39,8 +39,9 @@ public class GameSessionManager extends OptionalsHooksManager {
                     Location spawn = mgArena.getSpawns().get(i); //Initialisation d'un objet Location à spawn parmi ceux qui sont présents dans la liste getSpawns, associé à l'élément de la boucle
                     Bukkit.getPlayer(uuid).teleport(spawn); //Téléporter le joueur à son spawn affilié
                 }
-            } else {
+            } else if(nextArena instanceof TeamArena){
                 TeamArena teamArena = (TeamArena) nextArena;
+                System.out.println("teleportation ?");
                 teamArena.getTeams().forEach(team-> team.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).teleport(teamArena.getSpawnByTeam().get(team.getColor()))));
             }
         }

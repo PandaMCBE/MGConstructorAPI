@@ -78,14 +78,13 @@ public class ArenaManager extends OptionalsHooksManager {
                     }
                 }
             }
+            System.out.println(uuid);
             team.addPlayer((TeamArena) nextArena, uuid);
 
-            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers()) {
-                if(nextArena.getState().equals(State.WAITING)) {
+            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers() && !nextArena.getState().equals(State.STARTING)) {
                     nextArena.setState(State.STARTING);
-                }
+                    arenaManager.startCountDown(nextArena);
                 System.out.println("CountDown is going to start.");
-                arenaManager.startCountDown(nextArena);
             }
         }
     }
@@ -105,16 +104,16 @@ public class ArenaManager extends OptionalsHooksManager {
                     team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
                 }
                 if(arena.getAlluuids().size() == 1) {
-                    Player waitingPlayer = MGConstructorAPI.getInstance().gameManager.getOpponent(leaverUUID, arena);
-                    if (waitingPlayer.isOnline()) {
-                        if (arena.getState() == State.PLAYING) {
-                            breakOrPlace(arena);
-                        } else {
-                            arena.setState(State.WAITING);
-                            arena.setStartingTimer(30);
-                        }
-                        arena.restart();
-                        arena.getWaitingRoom().addQueueToArena(arena, arenaList);
+                    Player lastPlayer = MGConstructorAPI.getInstance().gameManager.getOpponent(leaverUUID, arena);
+                    if(lastPlayer!=null) {
+                            if (arena.getState() == State.PLAYING) {
+                                breakOrPlace(arena);
+                            } else {
+                                arena.setState(State.WAITING);
+                                arena.setStartingTimer(30);
+                            }
+                            arena.restart();
+                            arena.getWaitingRoom().addQueueToArena(arena, arenaList);
                     }
                 }else if((arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING))) {
                     arena.getWaitingRoom().addWaitingPlayerToArena(arena, arenaList);
