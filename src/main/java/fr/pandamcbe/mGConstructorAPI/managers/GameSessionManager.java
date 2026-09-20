@@ -220,9 +220,10 @@ public class GameSessionManager extends OptionalsHooksManager {
 
                         cancel(); //Arrêter le runnable
                     }
-
-                    if (arena.getTimerCycle() == 60 * cycle) //Si le timer du cycle de l'arène en cours est à 180
-                        cancel(); //Annuler le runnable
+                    if(arena.getTimerCycle() > 0) {
+                        if (arena.getTimerCycle() == 60 * cycle) //Si le timer du cycle de l'arène en cours est à 180
+                            cancel(); //Annuler le runnable
+                    }
                     timer--; //Enlever à la variable timer à chaque exécution du runnable
                 }
 

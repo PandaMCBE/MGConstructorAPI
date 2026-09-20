@@ -1,6 +1,5 @@
 package fr.pandamcbe.mGConstructorAPI.arenas;
 
-import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.managers.OptionalsHooksManager;
 import fr.pandamcbe.mGConstructorAPI.managers.WaitingRoom;
 import org.bukkit.Location;
@@ -165,7 +164,7 @@ public abstract class Arena extends OptionalsHooksManager {
         this.rounds = 0;
         this.timerCycle = 0;
         this.startingTimer = 30;
-        Team.resetTeamContent();
+        ((TeamArena) this).resetTeams();
     }
 
 

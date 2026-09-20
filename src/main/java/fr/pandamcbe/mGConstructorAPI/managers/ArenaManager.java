@@ -71,19 +71,19 @@ public class ArenaManager extends OptionalsHooksManager {
 
                 if(nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()) {
                     Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), ()-> nextArena.waitingRoom.waiting(arenaList, nextArena, uuid), 3 * 20);
-                } else {
-                    System.out.println("Count : "+nextArena.getAlluuids().size());
-                    if (!nextArena.getState().equals(State.PLAYING)) {
-                        nextArena.setState(State.PLAYING);
-                    }
                 }
             }
-            System.out.println(uuid);
+//            System.out.println(uuid);
             team.addPlayer((TeamArena) nextArena, uuid);
 
-            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers() && !nextArena.getState().equals(State.STARTING)) {
+            if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers()) {
+                if (!nextArena.getState().equals(State.STARTING)) {
                     nextArena.setState(State.STARTING);
                     arenaManager.startCountDown(nextArena);
+                }
+                if(nextArena.getAlluuids().size() == nextArena.getMaxPlayersAllowed()){
+                    nextArena.setState(State.PLAYING);
+                }
                 System.out.println("CountDown is going to start.");
             }
         }

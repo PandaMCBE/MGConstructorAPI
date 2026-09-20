@@ -11,19 +11,20 @@ import java.util.UUID;
 
     public class Team {
 
-        private static List<UUID> uuidList;
+        private List<UUID> uuidList;
         private String string;
         private ChatColor color;
-        private static Integer points;
+        private Integer points;
 
         public Team(String name, ChatColor color){
             this.string = name;
             this.color = color;
+            resetTeamContent();
         }
 
         public Team(){}
 
-        public static void resetTeamContent(){
+        public void resetTeamContent(){
             uuidList = new ArrayList<>();
             points = 0;
         }
@@ -33,7 +34,7 @@ import java.util.UUID;
         }
 
         public void setUuidList(List<UUID> uuidList) {
-            Team.uuidList = uuidList;
+            this.uuidList = uuidList;
         }
 
         public String getString() {
@@ -57,11 +58,12 @@ import java.util.UUID;
         }
 
         public void setPoints(Integer points) {
-            Team.points = points;
+            this.points = points;
         }
 
         public Team getNextTeam(TeamArena arena, Integer totalTeams){
             for(Team team : arena.getTeams()) {
+//                System.out.println("Max Player "+ team.getString()+" :"+ getMaximum(arena.getAlluuids().size(), totalTeams)+ ", team count : "+ team.getUuidList().size());
                 if(team.getUuidList().size() < getMaximum(arena.getAlluuids().size(), totalTeams)) {
                     return team;
                 }
@@ -69,11 +71,12 @@ import java.util.UUID;
             return null;
         }
         public void addPlayer(TeamArena nextArena, UUID uuid) {
-            System.out.println("team available :"+getNextTeam(nextArena, nextArena.getTotalTeams()).getString()+ ", team count : "+ getNextTeam(nextArena, nextArena.getTotalTeams()).getUuidList().size());
+//            System.out.println("TeamNumber :"+nextArena.getTeams().size());
+//            System.out.println("team available :"+getNextTeam(nextArena, nextArena.getTotalTeams()).getString());
             if (getNextTeam(nextArena, nextArena.getTotalTeams()) != null) {
                 Team nextTeam = getNextTeam(nextArena, nextArena.getTotalTeams());
                 nextTeam.getUuidList().add(uuid);
-                System.out.println(uuid + "team : "+ nextTeam.getString());
+//                System.out.println(getSpecificTeam(nextArena, ChatColor.RED).getUuidList().size());
             }
         }
 

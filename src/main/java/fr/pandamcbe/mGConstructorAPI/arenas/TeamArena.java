@@ -48,4 +48,8 @@ public abstract class TeamArena extends Arena{
 
     public abstract void nextRound(TeamArena arena, Team team);
 
+    public void resetTeams(){
+        teams.forEach(Team::resetTeamContent);
+    }
+
 }
