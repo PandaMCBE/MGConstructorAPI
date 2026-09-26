@@ -47,7 +47,7 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-    public void nextRound(ArenaManager arenaManager, List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
+    public void AnextRound(ArenaManager arenaManager, List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
         Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(winner.getUniqueId(), arenaList);
         if (arena.getAlluuids().size() > 1) {
             StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winner.getUniqueId(), AccountType.statsKey(serverName));
