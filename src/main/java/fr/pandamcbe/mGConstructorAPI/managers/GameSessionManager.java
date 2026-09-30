@@ -104,10 +104,12 @@ public class GameSessionManager extends OptionalsHooksManager {
         if (winnerArena.getAlluuids().size() >= 2) { //Si la liste d'ensemble de joueurs de l'arène a une taille supérieure ou égale à deux (parce qu'il ne faudrait pas qu'il soit seul dans la partie, sinon ça ne compte pas)
             winnerArena.getAlluuids().forEach(uuid -> Bukkit.getPlayer(uuid).sendMessage(arenaManager.getPrefix() + " > §l§3Téléportation dans 10s !"));
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
-                for (UUID uuids : winnerArena.getAlluuids()) {
+                Arena clone = winnerArena.clone();
+                winnerArena.restart();
+
+                for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
                 }
-                winnerArena.restart();
                 winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
 
             }, 10 * 20);
@@ -180,11 +182,12 @@ public class GameSessionManager extends OptionalsHooksManager {
         if (winnerArena.getTeams().size() >= 2) { //Si la liste des teams de l'arène a une taille supérieure ou égale à deux (parce qu'il ne faudrait pas qu'elle soit seule dans la partie, sinon ça ne compte pas)
             winnerTeam.getUuidList().forEach(uuid -> Bukkit.getPlayer(uuid).sendMessage(arenaManager.getPrefix() + " > §l§3Une nouvelle partie va débuter dans 10s !"));
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
+                Arena clone = winnerArena.clone();
+                winnerArena.restart();
 
-                for (UUID uuids : winnerTeam.getUuidList()) {
+                for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
                 }
-                winnerArena.restart();
                 winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
 
             }, 10 * 20);
@@ -245,12 +248,11 @@ public class GameSessionManager extends OptionalsHooksManager {
     }
 
     public Team getOpponentTeam(Team team, TeamArena arena){
-        for(Team otherteam : arena.getTeams()) {
-            if(team != otherteam){
-                return otherteam;
-            }
+        List<Team> filtered = arena.getTeams().stream().filter(team1 -> !team1.equals(team)).collect(Collectors.toList());
+        if(filtered.stream().findAny().isPresent()) {
+            return filtered.stream().findAny().get(); //retourner le joueur en paramètre par défaut
         }
-        return team;
+        return null;
     }
 
     public boolean tieOpponentExists(Arena arena){

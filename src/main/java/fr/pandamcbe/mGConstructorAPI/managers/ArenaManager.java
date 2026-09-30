@@ -52,11 +52,11 @@ public class ArenaManager extends OptionalsHooksManager {
         for (Arena arena : arenaList) { //Pour chaque objet Arena qui sont dans la liste définie de toutes les arènes existantes
             if (arena.getMode().equals(mgmode)) {
                 if (arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING) || arena.getState().equals(State.FINISHED)) { //Si l'arène n'a pas une liste d'ensemble de joueurs vide et si l'arène n'est pas démarrée. En gros, c'est pour repérer des arènes où des joueurs sont encore en attente, donc pas démarrée mais contient quand même des personnes dans sa liste.
-                    System.out.println("NextArena-State : "+ arena.getState());
+                    System.out.println("UUID : "+uuid.toString()+ " | NextArena-Name :"+arena.getName()+" | NextArena-State : "+ arena.getState());
                     joinArena(arenaManager, arenaList, arena, uuid);
                     break;
                 } else {
-                    System.out.println("waiting: "+arena.getState());
+                    System.out.println("UUID : "+uuid.toString()+ " | NextArena-Name :"+arena.getName()+" | waiting: "+arena.getState());
                     arena.waitingRoom.waiting(arenaList, arena, uuid);
                 }
             }

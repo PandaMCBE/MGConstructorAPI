@@ -7,7 +7,7 @@ import org.bukkit.Material;
 
 import java.util.*;
 
-public abstract class Arena extends OptionalsHooksManager {
+public abstract class Arena extends OptionalsHooksManager implements Cloneable{
     public List<UUID> Alluuids;
     public List<UUID> inGamePlayers;
     public Map<Location, Material> blocks;
@@ -167,6 +167,14 @@ public abstract class Arena extends OptionalsHooksManager {
         ((TeamArena) this).resetTeams();
     }
 
+    public Arena clone() {
+        try {
+            return (Arena) super.clone();
+        } catch (CloneNotSupportedException e){
+            e.printStackTrace();
+        }
+        return null;
+    }
 
 //    public abstract void OnChangingRoundCore(Arena arena, List<UUID> waitingPlayers, List<Arena> arenaList,Player winner);
 }

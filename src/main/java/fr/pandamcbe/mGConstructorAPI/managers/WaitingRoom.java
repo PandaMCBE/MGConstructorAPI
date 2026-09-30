@@ -64,9 +64,11 @@ public class WaitingRoom extends OptionalsHooksManager {
 
     public void waiting(List<Arena> arenaList, Arena arena, UUID uuid) {
         String waitingReason = waitingReason(arenaList, uuid);
+        System.out.println("waitingReason ?");
         if(waitingReason != null) {
             Player p = Bukkit.getPlayer(uuid);
-            if (waitingReason.equalsIgnoreCase("notArenaAvailable")) {
+            System.out.println("waitingReason isn't null");
+            if (waitingReason.equalsIgnoreCase("noArenaAvailable")) {
                 if (queue.isEmpty()) {
                     queue.add(new ArrayList<>());
                 }
