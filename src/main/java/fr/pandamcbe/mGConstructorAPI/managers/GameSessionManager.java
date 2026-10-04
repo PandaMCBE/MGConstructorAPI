@@ -92,10 +92,9 @@ public class GameSessionManager extends OptionalsHooksManager {
 
     public void eliminate(Player victim, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victim.getUniqueId(), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
-        MGArena victimArena = (MGArena) arena;
-        victim.teleport(victimArena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
+        victim.teleport(arena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
         victim.setGameMode(GameMode.SPECTATOR); //Mode du joueur en spectateur
-        victimArena.getInGamePlayers().remove(victim.getUniqueId()); //Retirement du joueur de la liste des non éliminés
+        arena.getInGamePlayers().remove(victim.getUniqueId()); //Retirement du joueur de la liste des non éliminés
     }
 
     public void checkWinCore(ArenaManager arenaManager, Player winner, List<Arena> arenaList) {
@@ -106,11 +105,11 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 Arena clone = winnerArena.clone();
                 winnerArena.restart();
+                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
 
                 for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
                 }
-                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
 
             }, 10 * 20);
         }
@@ -184,11 +183,10 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 Arena clone = winnerArena.clone();
                 winnerArena.restart();
-
+                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
                 for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
                 }
-                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
 
             }, 10 * 20);
         }

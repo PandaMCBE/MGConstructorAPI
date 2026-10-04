@@ -62,10 +62,10 @@ public class ParameterListeners implements Listener {
 
 
     @EventHandler
-    void onDeath(PlayerDeathEvent e) { //Je n'ai pas commenté tous les messages et ajouts de stats basiques
-        Player victim = e.getEntity();
+    void onDeath(PlayerDeathEvent e) {
+//        Player victim = e.getEntity();
         e.getDrops().clear(); //Destruction des items lorsqu'ils tombent au sol pour ne pas avoir des entités sur la map
-        victim.spigot().respawn(); //Exécuter une resuscitation du joueur forcée et automatique via spigot
+//        victim.spigot().respawn(); //Exécuter une resuscitation du joueur forcée et automatique via spigot
     }
 
 }
