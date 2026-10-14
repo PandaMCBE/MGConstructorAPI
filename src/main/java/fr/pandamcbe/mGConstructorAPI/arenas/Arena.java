@@ -164,7 +164,9 @@ public abstract class Arena extends OptionalsHooksManager implements Cloneable{
         this.rounds = 0;
         this.timerCycle = 0;
         this.startingTimer = 30;
-        ((TeamArena) this).resetTeams();
+        if(this instanceof TeamArena) {
+            ((TeamArena) this).resetTeams();
+        }
     }
 
     public Arena clone() {

@@ -2,6 +2,6 @@ package fr.pandamcbe.mGConstructorAPI.arenas;
 
 public enum State {
 
-    WAITING(), STARTING, PLAYING, FINISHED;
+    WAITING, STARTING, PLAYING, FINISHED;
 
 }

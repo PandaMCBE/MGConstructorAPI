@@ -5,7 +5,6 @@ import fr.pandamcbe.mGConstructorAPI.Team;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
 import fr.pandamcbe.mGConstructorAPI.arenas.TeamArena;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -57,7 +56,7 @@ public class ArenaManager extends OptionalsHooksManager {
                     break;
                 } else {
                     System.out.println("UUID : "+uuid.toString()+ " | NextArena-Name :"+arena.getName()+" | waiting: "+arena.getState());
-                    arena.waitingRoom.waiting(arenaList, arena, uuid);
+                    arena.waitingRoom.waiting(arenaList, arena, arenaManager, uuid);
                 }
             }
         }
@@ -69,12 +68,14 @@ public class ArenaManager extends OptionalsHooksManager {
             if(!nextArena.getAlluuids().contains(uuid) && nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
                 nextArena.getAlluuids().add(uuid);
 
-                if(nextArena.getAlluuids().size() < nextArena.getMinimumPlayers()) {
-                    Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), ()-> nextArena.waitingRoom.waiting(arenaList, nextArena, uuid), 3 * 20);
+                if(nextArena.getAlluuids().size() < nextArena.getMaxPlayersAllowed()) {
+                    nextArena.waitingRoom.waiting(arenaList, nextArena, arenaManager, uuid);
                 }
             }
 //            System.out.println(uuid);
-            team.addPlayer((TeamArena) nextArena, uuid);
+            if(nextArena instanceof TeamArena) {
+                team.addPlayer((TeamArena) nextArena, uuid);
+            }
 
             if (nextArena.getAlluuids().size() >= nextArena.getMinimumPlayers()) {
                 if (!nextArena.getState().equals(State.STARTING)) {
@@ -100,8 +101,10 @@ public class ArenaManager extends OptionalsHooksManager {
             } else {
                 arena.getAlluuids().remove(leaverUUID);
                 arena.getInGamePlayers().remove(leaverUUID);
-                if(team.getTeamByPlayer(leaver, (TeamArena) arena) != null){
-                    team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
+                if(arena instanceof TeamArena) {
+                    if (team.getTeamByPlayer(leaver, (TeamArena) arena) != null) {
+                        team.getTeamByPlayer(leaver, (TeamArena) arena).getUuidList().remove(leaverUUID);
+                    }
                 }
                 if(arena.getAlluuids().size() == 1) {
                     Player lastPlayer = MGConstructorAPI.getInstance().gameManager.getOpponent(leaverUUID, arena);

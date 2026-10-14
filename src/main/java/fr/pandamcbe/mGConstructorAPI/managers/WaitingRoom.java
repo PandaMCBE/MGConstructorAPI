@@ -56,13 +56,13 @@ public class WaitingRoom extends OptionalsHooksManager {
         Arena arena = arenaManager.getArenaByPlayer(uuid, arenaList);
         if(arena == null) {
             return "noArenaAvailable";
-        } else if(arena.getAlluuids().size() < arena.getMinimumPlayers()){
+        } else if(arena.getAlluuids().size() < arena.getMaxPlayersAllowed()){
             return "notEnoughPlayers";
         }
         return null;
     }
 
-    public void waiting(List<Arena> arenaList, Arena arena, UUID uuid) {
+    public void waiting(List<Arena> arenaList, Arena arena, ArenaManager arenaManager, UUID uuid) {
         String waitingReason = waitingReason(arenaList, uuid);
         System.out.println("waitingReason ?");
         if(waitingReason != null) {
@@ -83,13 +83,18 @@ public class WaitingRoom extends OptionalsHooksManager {
                 }
                 p.sendMessage("§b§lMG-Land > §cAucune arène n'est disponible pour le moment... :( Vous avez été placé en file d'attente.");
             } else if (waitingReason.equalsIgnoreCase("notEnoughPlayers")) {
-                if (!arena.getState().equals(State.WAITING)) {
-                    arena.setState(State.WAITING);
-                }
-                p.sendMessage("§b§lMG-Land > §cNombre de joueurs minimum : §e" + arena.getMinimumPlayers());
+                p.teleport(getLocation());
+                Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> {
+                    if (!arena.getState().equals(State.WAITING)) {
+                        arena.setState(State.WAITING);
+                    }
+                    if(arena.getAlluuids().size() < arena.getMinimumPlayers()) {
+                        p.sendMessage("§b§lMG-Land > §cNombre de joueurs minimum : §e" + arena.getMinimumPlayers());
+                    }
+
+                    MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, p, arenaManager), p);
+                }, 20);
             }
-            p.teleport(getLocation());
-            MGConstructorAPI.getInstance().getScoreboardManager().onLogin(new PersonalScoreboard(arenaList, p, getPrefix()), p);
         }
     }
 

@@ -38,6 +38,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 for (int i = 0; i < mgArena.getAlluuids().size(); i++) { //Pour chaque élément contenu dans liste d'ensemble de joueur de l'arène en fonction de sa taille
                     UUID uuid = mgArena.getAlluuids().get(i); //Initialisation d'un objet Joueur à un élément de la liste
                     Location spawn = mgArena.getSpawns().get(i); //Initialisation d'un objet Location à spawn parmi ceux qui sont présents dans la liste getSpawns, associé à l'élément de la boucle
+                    mgArena.getSpawnByPlayer().put(uuid, spawn);
                     Bukkit.getPlayer(uuid).teleport(spawn); //Téléporter le joueur à son spawn affilié
                 }
             } else if(nextArena instanceof TeamArena){
@@ -47,7 +48,7 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-    public void AnextRound(ArenaManager arenaManager, List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
+    public void nextRound(ArenaManager arenaManager, List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
         Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(winner.getUniqueId(), arenaList);
         if (arena.getAlluuids().size() > 1) {
             StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winner.getUniqueId(), AccountType.statsKey(serverName));

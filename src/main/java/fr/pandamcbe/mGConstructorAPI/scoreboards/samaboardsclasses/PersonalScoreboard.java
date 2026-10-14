@@ -3,6 +3,7 @@ package fr.pandamcbe.mGConstructorAPI.scoreboards.samaboardsclasses;
 import fr.pandamcbe.mGConstructorAPI.MGConstructorAPI;
 import fr.pandamcbe.mGConstructorAPI.arenas.Arena;
 import fr.pandamcbe.mGConstructorAPI.arenas.State;
+import fr.pandamcbe.mGConstructorAPI.managers.ArenaManager;
 import fr.pandamcbe.mgapi.serverutilapi.scoreboards.ObjectiveSign;
 import org.bukkit.entity.Player;
 
@@ -13,11 +14,11 @@ public class PersonalScoreboard extends fr.pandamcbe.mgapi.serverutilapi.scorebo
     private final MGConstructorAPI main = MGConstructorAPI.getInstance();
     private final List<Arena> arenaList;
 
-    public PersonalScoreboard(List<Arena> arenas, Player player, String name){
+    public PersonalScoreboard(List<Arena> arenas, Player player, ArenaManager arenaManager){
         this.player = player;
         arenaList = arenas;
         uuid = player.getUniqueId();
-        objectiveSign = new ObjectiveSign("sidebar", "§l§n"+ name);
+        objectiveSign = new ObjectiveSign("sidebar", "§l§n"+ arenaManager.getColor()+arenaManager.getPrefix());
         reloadData();
         objectiveSign.addReceiver(player);
     }
