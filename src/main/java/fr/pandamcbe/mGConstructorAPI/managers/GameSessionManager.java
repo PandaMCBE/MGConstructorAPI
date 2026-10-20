@@ -38,7 +38,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                 for (int i = 0; i < mgArena.getAlluuids().size(); i++) { //Pour chaque élément contenu dans liste d'ensemble de joueur de l'arène en fonction de sa taille
                     UUID uuid = mgArena.getAlluuids().get(i); //Initialisation d'un objet Joueur à un élément de la liste
                     Location spawn = mgArena.getSpawns().get(i); //Initialisation d'un objet Location à spawn parmi ceux qui sont présents dans la liste getSpawns, associé à l'élément de la boucle
-                    mgArena.getSpawnByPlayer().put(uuid, spawn);
+//                    mgArena.getSpawnpointUUID().put(uuid, spawn);
                     Bukkit.getPlayer(uuid).teleport(spawn); //Téléporter le joueur à son spawn affilié
                 }
             } else if(nextArena instanceof TeamArena){
@@ -73,6 +73,8 @@ public class GameSessionManager extends OptionalsHooksManager {
                         pls.sendTitle("§eEgalité !", "§6Recommencez");
                         pls.sendMessage(arenaManager.getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la partie et que le meilleur gagne !");
                     }
+                    System.out.println("Won Rounds");
+
                     startCountDown(arena);
                 } else {
                     Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.getMaxRounds()).findAny();
@@ -86,6 +88,7 @@ public class GameSessionManager extends OptionalsHooksManager {
         if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() -1 )) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
             arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
             arenaManager.startCountDown(arena);
+            System.out.println("Won Rounds by :" + winner.getUniqueId() +" : " + arena.getWonRounds().get(winner.getUniqueId()));
         } else {
             ifLastRound(arenaManager, arena);
         }
@@ -94,6 +97,7 @@ public class GameSessionManager extends OptionalsHooksManager {
     public void eliminate(Player victim, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victim.getUniqueId(), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
         victim.teleport(arena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
+        System.out.println("eliminate triggered | " + arena.getMiddlespawn());
         victim.setGameMode(GameMode.SPECTATOR); //Mode du joueur en spectateur
         arena.getInGamePlayers().remove(victim.getUniqueId()); //Retirement du joueur de la liste des non éliminés
     }
@@ -106,7 +110,7 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 Arena clone = winnerArena.clone();
                 winnerArena.restart();
-                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
+                winnerArena.getWaitingRoom().addQueueToArena(arenaManager, winnerArena, arenaList);
 
                 for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
@@ -184,7 +188,7 @@ public class GameSessionManager extends OptionalsHooksManager {
             Bukkit.getScheduler().runTaskLater(MGConstructorAPI.getInstance(), () -> { //Mise en place d'un scheduler qui s'exécutera après un délai de 10s
                 Arena clone = winnerArena.clone();
                 winnerArena.restart();
-                winnerArena.getWaitingRoom().addQueueToArena(winnerArena, arenaList);
+                winnerArena.getWaitingRoom().addQueueToArena(arenaManager, winnerArena, arenaList);
                 for (UUID uuids : clone.getAlluuids()) {
                     arenaManager.customJoinEvent(Bukkit.getPlayer(uuids));
                 }

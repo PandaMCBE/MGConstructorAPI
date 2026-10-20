@@ -98,7 +98,7 @@ public class WaitingRoom extends OptionalsHooksManager {
         }
     }
 
-    public void addQueueToArena(Arena nextArena, List<Arena> arenaList) {
+    public void addQueueToArena(ArenaManager arenaManager, Arena nextArena, List<Arena> arenaList) {
         if (!queue.isEmpty()) {
             List<UUID> waitingList = queue.poll();
             for (UUID waiting : waitingList) {
@@ -107,7 +107,7 @@ public class WaitingRoom extends OptionalsHooksManager {
         }
     }
 
-    public void addWaitingPlayerToArena(Arena arena, List<Arena> arenaList){
+    public void addWaitingPlayerToArena(ArenaManager arenaManager, Arena arena, List<Arena> arenaList){
         if(!queue.isEmpty()) {
             List<UUID> waitingList = queue.stream().findFirst().get();
             arenaManager.joinArena(arenaManager, arenaList, arena, waitingList.getLast());

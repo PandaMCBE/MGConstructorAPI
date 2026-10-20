@@ -10,7 +10,7 @@ public abstract class MGArena extends Arena {
 
     public List<Location> spawns;
 
-    public Map<UUID, Location> spawnByPlayer;
+    public Map<UUID, Location> spawnpointUUID;
 
     public List<Location> getSpawns() {
         return spawns;
@@ -20,12 +20,12 @@ public abstract class MGArena extends Arena {
         spawns = Spawns;
     }
 
-    public Map<UUID, Location> getSpawnByPlayer() {
-        return spawnByPlayer;
+    public Map<UUID, Location> getSpawnpointUUID() {
+        return spawnpointUUID;
     }
 
-    public void setSpawnByPlayer(Map<UUID, Location> spawnByPlayer) {
-        this.spawnByPlayer = spawnByPlayer;
+    public void setSpawnpointUUID(Map<UUID, Location> spawnpointUUID) {
+        this.spawnpointUUID = spawnpointUUID;
     }
 
     public abstract void nextRound(MGArena arena, Object o);

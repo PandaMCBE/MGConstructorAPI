@@ -90,7 +90,7 @@ public class ArenaManager extends OptionalsHooksManager {
         }
     }
 
-    public void whenPlayerDisconnects(Player leaver, Arena arena, List<Arena> arenaList){
+    public void whenPlayerDisconnects(ArenaManager arenaManager, Player leaver, Arena arena, List<Arena> arenaList){
         MGConstructorAPI.getInstance().getScoreboardManager().onLogout(leaver);
         UUID leaverUUID = leaver.getUniqueId();
         if(arena != null) {
@@ -111,15 +111,17 @@ public class ArenaManager extends OptionalsHooksManager {
                     if(lastPlayer!=null) {
                             if (arena.getState() == State.PLAYING) {
                                 breakOrPlace(arena);
+                                arena.restart();
+                                arena.getWaitingRoom().addQueueToArena(arenaManager, arena, arenaList);
+                                arenaManager.customJoinEvent(lastPlayer);
                             } else {
                                 arena.setState(State.WAITING);
                                 arena.setStartingTimer(30);
                             }
-                            arena.restart();
-                            arena.getWaitingRoom().addQueueToArena(arena, arenaList);
+
                     }
                 }else if((arena.getState().equals(State.STARTING) || arena.getState().equals(State.WAITING))) {
-                    arena.getWaitingRoom().addWaitingPlayerToArena(arena, arenaList);
+                    arena.getWaitingRoom().addWaitingPlayerToArena(arenaManager, arena, arenaList);
                 }
             }
         }
