@@ -57,6 +57,7 @@ public class GameSessionManager extends OptionalsHooksManager {
             statsAccount.setElos(statsAccount.getElos()+ Elos);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.statsKey(serverName), statsAccount);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix(), profilAccount);
+            System.out.println("test");
             ifLessThanMaxRounds(arenaManager, arena, winner);
         }
     }
@@ -85,9 +86,11 @@ public class GameSessionManager extends OptionalsHooksManager {
     }
 
     public void ifLessThanMaxRounds(ArenaManager arenaManager, Arena arena, Player winner) {
-        if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() -1 )) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
+        System.out.println("called ?");
+        if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
             arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
-            arenaManager.startCountDown(arena);
+            System.out.println("working ?");
+//            arenaManager.startCountDown(arena);
             System.out.println("Won Rounds by :" + winner.getUniqueId() +" : " + arena.getWonRounds().get(winner.getUniqueId()));
         } else {
             ifLastRound(arenaManager, arena);
