@@ -57,42 +57,43 @@ public class GameSessionManager extends OptionalsHooksManager {
             statsAccount.setElos(statsAccount.getElos()+ Elos);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.statsKey(serverName), statsAccount);
             dirtyManager.markDirty(winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix(), profilAccount);
-            System.out.println("test");
             ifLessThanMaxRounds(arenaManager, arena, winner);
         }
     }
 
     public void ifLastRound(ArenaManager arenaManager, Arena arena) {
-        List<UUID> nearMaxPoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == (arena.getMaxRounds() - 1)).collect(Collectors.toList());
-        nearMaxPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) + 1));
-        if(!nearMaxPoints.isEmpty()) {
-            if (arena.getWonRounds().keySet().stream().anyMatch(uuid -> arena.getWonRounds().get(uuid) == arena.getMaxRounds())) {
+        List<UUID> highestPoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid).equals(getHighestPoints(arena.getWonRounds()))).collect(Collectors.toList());
+//        highestPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) + 1));
+        if(!highestPoints.isEmpty()) {
+            if (arena.getWonRounds().keySet().stream().anyMatch(uuid -> arena.getWonRounds().get(uuid).equals(getHighestPoints(arena.getWonRounds()))) && arena.getRounds() == arena.getMaxRounds()) {
+                System.out.println("test");
                 if (tieOpponentExists(arena)) {
-                    nearMaxPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) - 1));
+                    highestPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) - 1));
                     for (UUID uuid : arena.getInGamePlayers()) {
                         Player pls = Bukkit.getPlayer(uuid);
                         pls.sendTitle("§eEgalité !", "§6Recommencez");
                         pls.sendMessage(arenaManager.getPrefix() + " > §lOn vous a retiré 1 point à tous ! §dRejouez la partie et que le meilleur gagne !");
                     }
-                    System.out.println("Won Rounds");
 
-                    startCountDown(arena);
+                    arenaManager.startCountDown(arena);
                 } else {
-                    Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.getMaxRounds()).findAny();
-                    winner.ifPresent(uuid -> arena.customWinEvent(Bukkit.getPlayer(uuid)));
+//                    Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.getMaxRounds()).findAny();
+//                    winner.ifPresent(uuid -> arena.customWinEvent(Bukkit.getPlayer(uuid)));
+                    arena.customWinEvent(Bukkit.getPlayer(getHighestPointsPlayer(arena.getWonRounds())));
                 }
             }
         }
     }
 
     public void ifLessThanMaxRounds(ArenaManager arenaManager, Arena arena, Player winner) {
-        System.out.println("called ?");
-        if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
-            arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
-            System.out.println("working ?");
-//            arenaManager.startCountDown(arena);
-            System.out.println("Won Rounds by :" + winner.getUniqueId() +" : " + arena.getWonRounds().get(winner.getUniqueId()));
-        } else {
+        if(arena.getRounds() < (arena.getMaxRounds() - 1)) {
+            System.out.println("Number of Rounds : "+ arena.getRounds() + " | Max Rounds : " + (arena.getMaxRounds() - 1));
+            if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
+                arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
+                System.out.println("Won Rounds by :" + winner.getUniqueId() + " : " + arena.getWonRounds().get(winner.getUniqueId()));
+            }
+        }else {
+            arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1);
             ifLastRound(arenaManager, arena);
         }
     }
@@ -100,7 +101,6 @@ public class GameSessionManager extends OptionalsHooksManager {
     public void eliminate(Player victim, List<Arena> arenaList) {
         Arena arena = arenaManager.getArenaByPlayer(victim.getUniqueId(), arenaList); //Récupération de l'arène où se trouve le joueur éliminé
         victim.teleport(arena.getMiddlespawn()); //Téléportation du joueur à la location au centre de l'arène
-        System.out.println("eliminate triggered | " + arena.getMiddlespawn());
         victim.setGameMode(GameMode.SPECTATOR); //Mode du joueur en spectateur
         arena.getInGamePlayers().remove(victim.getUniqueId()); //Retirement du joueur de la liste des non éliminés
     }
@@ -209,6 +209,17 @@ public class GameSessionManager extends OptionalsHooksManager {
         p.setHealth(20.0); //Guérison du joueur pour reprendre depuis sa dernière partie si elle a existé
     }
 
+    public UUID getHighestPointsPlayer(Map<UUID, Integer> wonRounds){
+        List<Map.Entry<UUID, Integer>> sortedValues = new ArrayList<>(wonRounds.entrySet());
+        sortedValues.sort(Map.Entry.comparingByValue(Collections.reverseOrder())); //Trier le getter de la liste d'entrées des joueurs par points dans l'ordre décroissant
+        return sortedValues.getFirst().getKey(); //retourner null par défaut, s'il n'y a aucun joueur
+    }
+    public Integer getHighestPoints(Map<UUID, Integer> wonRounds){
+        List<Map.Entry<UUID, Integer>> sortedValues = new ArrayList<>(wonRounds.entrySet());
+        sortedValues.sort(Map.Entry.comparingByValue(Collections.reverseOrder())); //Trier le getter de la liste d'entrées des joueurs par points dans l'ordre décroissant
+        return sortedValues.getFirst().getValue(); //retourner null par défaut, s'il n'y a aucun joueur
+    }
+
     public void onDeath(ArenaManager arenaManager, Arena arena, GameMode mode, int time, int cycle, Player player) {
 
         if (arena != null) { //Si l'objet arène n'est pas null
@@ -222,8 +233,11 @@ public class GameSessionManager extends OptionalsHooksManager {
                 public void run() {
                     if (!player.isOnline()) { //Si le joueur mort n'est pas en ligne sur le serveur
                         cancel(); //Annuler le runnable
-                        playerQuits(arena, player);
+                        arenaManager.playerQuits(arena, player);
                         return; //Arrêter l'exécution du reste du code
+                    } else if(arena.getAlluuids().size() == 1){
+                        cancel();
+                        return;
                     }
 
                     if (timer >= 1) { //Si la variable timer est supérieure ou égale à 1

@@ -9,6 +9,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,7 +117,6 @@ public class ArenaManager extends OptionalsHooksManager {
                                 arenaManager.customJoinEvent(lastPlayer);
                             } else {
                                 arena.setState(State.WAITING);
-                                arena.setStartingTimer(30);
                             }
 
                     }
@@ -136,6 +136,7 @@ public class ArenaManager extends OptionalsHooksManager {
             for (Location loc : arena.getBlocks().keySet()) {
                 loc.getBlock().setType(Material.AIR);
             }
+            arena.setBlocks(new HashMap<>());
         }
     }
 
@@ -145,6 +146,7 @@ public class ArenaManager extends OptionalsHooksManager {
                 Material material = arena.getBlocks().get(loc); //Initialisation d'un objet Material à une valeur d'une clé de type location de la map "blocks". En gros obtenir le type de block correspondant à la location qui est retournée par la boucle For de la map blocks.
                 loc.getBlock().setType(material); //Définition du type de block qu'est la location récupérée par la boucle parmi les clés de la map "blocks" par celui qui lui est associé en valeur
             } //En gros, tous les blocs qui ont été cassés et placés dans la map par leur coordonées et leur type sont replacées sur les locations qui correspondent à chaque clé.
+            arena.setBlocks(new HashMap<>());
         }
     }
 }

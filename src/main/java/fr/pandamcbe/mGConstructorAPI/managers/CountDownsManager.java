@@ -22,19 +22,24 @@ public class CountDownsManager {
     public void runNewGame(BukkitRunnable runnable, Player pls) {
         if (arena == null || arena.getAlluuids().size() <= 1) { //Si l'arène est null ou qu'elle ne contient pas de joueurs ou un seul
             runnable.cancel(); //Annuler le runnable
+            if(arena != null)
+                arena.setStartingTimer(60);
             return; //Arrêter l'exécution du code
         }
 
         if (!pls.isOnline()) { //Si un joueur n'est pas en ligne
             arenaManager.playerQuits(arena, pls); //Appliquer cette méthode pour cet objet Joueur de la liste
         }
+        if(arena.getAlluuids().size() == arena.getMaxPlayersAllowed() && arena.getStartingTimer() > 30) {
+            arena.setStartingTimer(30);
+        }
         switch (arena.getStartingTimer()){
             case 10:
-                pls.sendMessage(arenaManager.getPrefix()+ " §3§l> §b§lLa partie commence dans §n" + arena.getStartingTimer() + " §r§d§lsecondes !"); //Afficher à tous les joueurs, l'état de démarrage du jeu
+                pls.sendMessage(arenaManager.getColor()+arenaManager.getPrefix()+ " §3§l> §b§lLa partie commence dans §n" + arena.getStartingTimer() + " §r§d§lsecondes !"); //Afficher à tous les joueurs, l'état de démarrage du jeu
                 pls.playSound(pls.getLocation(), Sound.NOTE_PLING, 1.0f, 1.0f); //Joueur le son à tous les joueurs
                 break;
             case 1:
-                pls.sendMessage(arenaManager.getPrefix()+" §3§l> §b§lLa partie commence dans §n1 §r§d§lseconde ! ");
+                pls.sendMessage(arenaManager.getColor()+arenaManager.getPrefix()+" §3§l> §b§lLa partie commence dans §n1 §r§d§lseconde ! ");
                 pls.playSound(pls.getLocation(), Sound.NOTE_PLING, 1.0f, 1.0f); //Même chose que timerEvent mais spécialement pour la dernière seconde
                 break;
             case 0:
