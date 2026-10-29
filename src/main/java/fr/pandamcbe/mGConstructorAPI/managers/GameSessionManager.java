@@ -62,12 +62,12 @@ public class GameSessionManager extends OptionalsHooksManager {
     }
 
     public void ifLastRound(ArenaManager arenaManager, Arena arena) {
-        List<UUID> highestPoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid).equals(getHighestPoints(arena.getWonRounds()))).collect(Collectors.toList());
+        List<UUID> highestPoints = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid).equals(getHighestPointsPlayer(arena.getWonRounds(), false))).collect(Collectors.toList());
 //        highestPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) + 1));
         if(!highestPoints.isEmpty()) {
-            if (arena.getWonRounds().keySet().stream().anyMatch(uuid -> arena.getWonRounds().get(uuid).equals(getHighestPoints(arena.getWonRounds()))) && arena.getRounds() == arena.getMaxRounds()) {
+            if (arena.getRounds() == arena.getMaxRounds()) {
                 System.out.println("test");
-                if (tieOpponentExists(arena)) {
+                if ((long) highestPoints.size() > 1) {
                     highestPoints.forEach(uuid -> arena.getWonRounds().put(uuid, arena.getWonRounds().get(uuid) - 1));
                     for (UUID uuid : arena.getInGamePlayers()) {
                         Player pls = Bukkit.getPlayer(uuid);
@@ -79,21 +79,15 @@ public class GameSessionManager extends OptionalsHooksManager {
                 } else {
 //                    Optional<UUID> winner = arena.getInGamePlayers().stream().filter(uuid -> arena.getWonRounds().get(uuid) == arena.getMaxRounds()).findAny();
 //                    winner.ifPresent(uuid -> arena.customWinEvent(Bukkit.getPlayer(uuid)));
-                    arena.customWinEvent(Bukkit.getPlayer(getHighestPointsPlayer(arena.getWonRounds())));
+                    arena.customWinEvent(Bukkit.getPlayer((UUID) getHighestPointsPlayer(arena.getWonRounds(), true)));
                 }
             }
         }
     }
 
     public void ifLessThanMaxRounds(ArenaManager arenaManager, Arena arena, Player winner) {
-        if(arena.getRounds() < (arena.getMaxRounds() - 1)) {
-            System.out.println("Number of Rounds : "+ arena.getRounds() + " | Max Rounds : " + (arena.getMaxRounds() - 1));
-            if (arena.getWonRounds().get(winner.getUniqueId()) < (arena.getMaxRounds() - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
-                arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1); //Ajouter 1 à la valeur de la clé du joueur
-                System.out.println("Won Rounds by :" + winner.getUniqueId() + " : " + arena.getWonRounds().get(winner.getUniqueId()));
-            }
-        }else {
-            arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1);
+        arena.getWonRounds().put(winner.getUniqueId(), arena.getWonRounds().get(winner.getUniqueId()) + 1);
+        if(arena.getRounds() == (arena.getMaxRounds() - 1)) {
             ifLastRound(arenaManager, arena);
         }
     }
@@ -139,21 +133,18 @@ public class GameSessionManager extends OptionalsHooksManager {
     }
 
     public void ifLessThanMaxRoundsTeam(ArenaManager arenaManager, TeamArena arena, Team winnerTeam) {
-        if (winnerTeam.getPoints() < (arena.getMaxRounds() - 1)) { //Si le joueur a un nombre de manches remportées inférieur à 5 dans la map wonRounds
-            winnerTeam.setPoints(winnerTeam.getPoints() + 1); //Ajouter 1 à la valeur de la clé du joueur
-            arenaManager.startCountDown(arena);
-        } else {
+        winnerTeam.setPoints(winnerTeam.getPoints() + 1);
+        if(arena.getRounds() == (arena.getMaxRounds() - 1)) {
             ifLastRoundTeam(arenaManager, arena);
         }
     }
 
     public void ifLastRoundTeam(ArenaManager arenaManager, TeamArena arena) {
-        List<Team> nearMaxPoints = arena.getTeams().stream().filter(team -> team.getPoints() == (arena.getMaxRounds() - 1)).collect(Collectors.toList());
-        if (!nearMaxPoints.isEmpty()) {
-            nearMaxPoints.forEach(team -> team.setPoints(team.getPoints() + 1));
-            if (arena.getTeams().stream().anyMatch(team -> team.getPoints() == arena.getMaxRounds())) {
-                if (tieOpponentTeamExists(arena)) {
-                    nearMaxPoints.forEach(team -> team.setPoints(team.getPoints() - 1));
+        List<Team> highestPoints = arena.getTeams().stream().filter(team -> team.getPoints() == (arena.getMaxRounds() - 1)).collect(Collectors.toList());
+        if (!highestPoints.isEmpty()) {
+            if (arena.getRounds()== arena.getMaxRounds()) {
+                if ((long) highestPoints.size() > 1) {
+                    highestPoints.forEach(team -> team.setPoints(team.getPoints() - 1));
                     for (UUID uuid : arena.getAlluuids()) {
                         Player pls = Bukkit.getPlayer(uuid);
                         pls.sendTitle("§eEgalité !", "§6Recommencez");
@@ -162,8 +153,7 @@ public class GameSessionManager extends OptionalsHooksManager {
                     startCountDown(arena);
 
                 } else {
-                    Optional<Team> winner = arena.getTeams().stream().filter(team -> team.getPoints() == arena.maxRounds).findAny();
-                    winner.ifPresent(team -> arena.customWinEvent(winner.get()));
+                    arena.customWinEvent(getHighestPointsTeam(arena.getTeams(), true));
                 }
             }
         }
@@ -209,15 +199,25 @@ public class GameSessionManager extends OptionalsHooksManager {
         p.setHealth(20.0); //Guérison du joueur pour reprendre depuis sa dernière partie si elle a existé
     }
 
-    public UUID getHighestPointsPlayer(Map<UUID, Integer> wonRounds){
+    public Object getHighestPointsPlayer(Map<UUID, Integer> wonRounds, boolean keyOrValue){
         List<Map.Entry<UUID, Integer>> sortedValues = new ArrayList<>(wonRounds.entrySet());
-        sortedValues.sort(Map.Entry.comparingByValue(Collections.reverseOrder())); //Trier le getter de la liste d'entrées des joueurs par points dans l'ordre décroissant
-        return sortedValues.getFirst().getKey(); //retourner null par défaut, s'il n'y a aucun joueur
+        sortedValues.sort(Map.Entry.comparingByValue(Collections.reverseOrder()));
+        if(keyOrValue) {
+            return sortedValues.getFirst().getKey();
+        } else {
+            return sortedValues.getFirst().getValue();
+        }
     }
-    public Integer getHighestPoints(Map<UUID, Integer> wonRounds){
-        List<Map.Entry<UUID, Integer>> sortedValues = new ArrayList<>(wonRounds.entrySet());
-        sortedValues.sort(Map.Entry.comparingByValue(Collections.reverseOrder())); //Trier le getter de la liste d'entrées des joueurs par points dans l'ordre décroissant
-        return sortedValues.getFirst().getValue(); //retourner null par défaut, s'il n'y a aucun joueur
+    public Object getHighestPointsTeam(List<Team> teams, boolean keyOrValue){
+        if(keyOrValue) {
+            teams.sort(Comparator.comparing(Team::getPoints).reversed());
+            return teams.getFirst();
+        } else {
+            List<Integer> sortedValues = new ArrayList<>();
+            teams.forEach(team -> sortedValues.add(team.getPoints()));
+            sortedValues.sort(Comparator.reverseOrder());
+            return sortedValues.getFirst();
+        }
     }
 
     public void onDeath(ArenaManager arenaManager, Arena arena, GameMode mode, int time, int cycle, Player player) {
@@ -273,14 +273,6 @@ public class GameSessionManager extends OptionalsHooksManager {
             return filtered.stream().findAny().get(); //retourner le joueur en paramètre par défaut
         }
         return null;
-    }
-
-    public boolean tieOpponentExists(Arena arena){
-        return arena.getWonRounds().keySet().stream().filter(p5 -> arena.getWonRounds().get(p5) == 5).count() > 1;
-    }
-
-    public boolean tieOpponentTeamExists(TeamArena arena){
-        return arena.getTeams().stream().filter(team5 -> team5.getPoints() == 5).count() > 1;
     }
 
 }
