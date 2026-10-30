@@ -27,7 +27,4 @@ public abstract class MGArena extends Arena {
     public void setSpawnpointUUID(Map<UUID, Location> spawnpointUUID) {
         this.spawnpointUUID = spawnpointUUID;
     }
-
-    public abstract void nextRound(MGArena arena, Object o);
-
 }

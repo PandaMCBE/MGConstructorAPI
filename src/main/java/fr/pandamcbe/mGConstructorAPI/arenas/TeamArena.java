@@ -46,8 +46,6 @@ public abstract class TeamArena extends Arena{
         this.goalByTeam = goalByTeam;
     }
 
-    public abstract void nextRound(TeamArena arena, Team team);
-
     public void resetTeams(){
         teams.forEach(Team::resetTeamContent);
     }

@@ -18,6 +18,8 @@ public abstract class OptionalsHooksManager {
 
     public ChatColor getColor() {return null;}
 
+    public void onSwitchingRound(Arena arena, Object entity){}
+
     public void customWinEvent(Object o){};
 
     public void customJoinEvent(Player player){}

@@ -48,8 +48,8 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-    public void nextRound(ArenaManager arenaManager, List<Arena> arenaList,Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
-        Arena arena = MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(winner.getUniqueId(), arenaList);
+    public void nextRound(ArenaManager arenaManager, MGArena arena, Player winner, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
+        arenaManager.onSwitchingRound(arena, winner);
         if (arena.getAlluuids().size() > 1) {
             StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winner.getUniqueId(), AccountType.statsKey(serverName));
             ProfilAccount profilAccount = (ProfilAccount) memoryProvider.getProfilAccount(mainMap, winner.getUniqueId(), AccountType.PROFIL.getKeyPrefix());
@@ -117,8 +117,8 @@ public class GameSessionManager extends OptionalsHooksManager {
         }
     }
 
-    public void nextRoundTeam(ArenaManager arenaManager, List<Arena> arenaList, Team team, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
-        TeamArena arena = (TeamArena) MGConstructorAPI.getInstance().getArenaManager().getArenaByPlayer(team.getUuidList().getFirst(), arenaList);
+    public void nextRoundTeam(ArenaManager arenaManager, TeamArena arena, Team team, Map<UUID, Map<String, Object>> mainMap, int Coins, int Elos) {
+        arenaManager.onSwitchingRound(arena, team);
         if (arena.getAlluuids().size() > 1) {
             for(UUID winnerUuid : team.getUuidList()) {
                 StatsAccount statsAccount = (StatsAccount) memoryProvider.getStatsAccount(mainMap, winnerUuid, AccountType.statsKey(serverName));
